@@ -81,10 +81,6 @@ LM_NextFrame:
 ;; Draw screen - 192 scanlines - 2 scanline kernel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    lda #%00000001
-    bit SWCHB
-    beq Reset
-
     lda LM_LogoFade
     cmp #0
     beq .LM_FadeDone
@@ -164,10 +160,98 @@ LM_NextFrame:
 .LM_OverScanWait:
     lda #2              ; A = 2 = #%00000010
     sta VBLANK          ; Turn on VBLANK
-    ldx #30             ; X = 30
+    ldx #29             ; X = 30-1
     WAIT_X_WSYNC        ; Wait for X scanlines
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Check input
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    lda #%00000001
+    bit SWCHB
+    bne .LM_NoReset
+    jmp Reset
+.LM_NoReset:
+
+    lda #%10000000
+    bit INPT4    
+    bne .LM_NoFireButton
+    jmp GM_NextFrame
+.LM_NoFireButton:
+    sta WSYNC
+
     jmp LM_NextFrame
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; MODE: GAME - Start new frame
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GM_NextFrame:
+    lda #2                  ; A = 2 = #%00000010
+    sta VBLANK              ; Turn on VBLANK
+    VERTICAL_SYNC           ; Vertical sync - 3 scanlines
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Vertical blank - 37 scanlines total
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Wait for the remining scanlines - Total 37
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.GM_VBLankWait:
+    ldx #37             ; X = 37
+    WAIT_X_WSYNC        ; Wait for X scanlines
+
+    lda #0              ; A = 0 = #%00000000
+    sta VBLANK          ; Turn off VBLANK
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Draw screen - 192 scanlines
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    lda #%00001000
+    bit SWCHB
+    beq .GM_BW
+.GM_Color:
+    lda LOGO_BACKGROUND_COLOR           
+    sta COLUBK
+    lda LOGO_COLOR
+    sta COLUPF
+    jmp .GM_ColorDone
+.GM_BW:
+    lda LOGO_BACKGROUND_BW
+    sta COLUBK
+    lda LOGO_COLOR
+    sta COLUPF
+.GM_ColorDone:
+
+    ldx #192
+    WAIT_X_WSYNC
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Handle overscan - 30 scanlines
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.GM_OverScanWait:
+    lda #2              ; A = 2 = #%00000010
+    sta VBLANK          ; Turn on VBLANK
+    ldx #29             ; X = 30-1
+    WAIT_X_WSYNC        ; Wait for X scanlines
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Check input
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    lda #%00000001
+    bit SWCHB
+    bne .GM_NoReset
+    jmp Reset
+.GM_NoReset:
+    sta WSYNC
+
+    jmp GM_NextFrame
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup tabes
