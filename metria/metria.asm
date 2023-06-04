@@ -14,6 +14,32 @@
         bne .WaitX          ; Loop until X = 0
     ENDM
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SetObjectXPos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; A : Contains the the desired x-coordinate
+;; Y=0 : Player0
+;; Y=1 : Player1
+;; Y=2 : Missile0
+;; Y=3 : Missile1
+;; Y=4 : Ball
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    MAC SetObjectXPos
+        sta WSYNC               ; Get fresh scanline
+        sec                     ; Set carry flag
+.Div15Loop                  ; Divide A with 15 by subtraction in loop
+        sbc #15                 ; Subtract 15 from A
+        bcs .Div15Loop          ; Loop if carry flag is set
+        eor #7                  ; Adjust the remainder in A between -8 and 7
+        REPEAT 4                ; Repeat 4 times
+            asl                 ; Shift bits left by one
+        REPEND                  ; End of repeat
+        sta HMP0,Y              ; Set fine position value for object HMP0+Y
+        sta RESP0,Y             ; Seset rough position for object HMP0+Y
+    ENDM
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Contants
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -43,8 +69,10 @@ GM_PlayerPtr        ds 2
 GM_PlayerColorPtr   ds 2
 GM_PlayerXPos       ds 1
 GM_PlayerYPos       ds 1
-GM_PlayerMode       ds 1
-GM_SelectActive     ds 1
+
+GM_BugColorPtr      ds 2
+GM_BugXPos          ds 1
+GM_BugYPos          ds 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program start - Located at top of ROM at address $F000
@@ -68,14 +96,17 @@ Reset:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR
 
+    SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
+
     lda #67
     sta GM_PlayerXPos
     lda #46
     sta GM_PlayerYPos
-    lda #0
-    sta GM_PlayerMode
-    lda #0
-    sta GM_SelectActive
+
+    lda #10
+    sta GM_BugXPos
+    lda #10
+    sta GM_BugYPos
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MODE: LOGO - Start new frame
@@ -219,7 +250,11 @@ GM_NextFrame:
 
     lda GM_PlayerXPos
     ldy #0
-    jsr SetObjectXPos
+    SetObjectXPos
+
+    lda GM_BugXPos
+    ldy #1
+    SetObjectXPos
 
     sta WSYNC               ; Wait for next scanline
     sta HMOVE               ; Apply the fine position offset
@@ -228,15 +263,11 @@ GM_NextFrame:
 ;; Wait for the remining scanlines - Total 37
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .GM_VBLankWait:
-    ldx #35             ; X = 37-2
+    ldx #33             ; X = 37-3
     WAIT_X_WSYNC        ; Wait for X scanlines
 
     lda #0              ; A = 0 = #%00000000
     sta VBLANK          ; Turn off VBLANK
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Draw screen - 192 scanlines
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     lda #%00001000
     bit SWCHB
@@ -247,6 +278,7 @@ GM_NextFrame:
     lda LOGO_COLOR
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR
+    ; SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
     jmp .GM_ColorDone
 .GM_BW:
     lda GAME_BK_BW
@@ -254,18 +286,24 @@ GM_NextFrame:
     lda LOGO_COLOR
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW
+    ; SET_POINTER GM_BugColorPtr, GM_BUG_BW
 .GM_ColorDone:
+    sta WSYNC
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Draw screen - 192 scanlines - 2 line kernel
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ldx #96            ; X counter contains the remaining scanlines
 
-Scanline:
+.GM_KernelLoop:
+
     txa                 ; transfer X to A
     sec                 ; make sure carry flag is set
     sbc GM_PlayerYPos   ; subtract sprite Y coordinate
     cmp GAME_PLAYER_HEIGHT   ; are we inside the sprite height bounds?
     bcc .GM_LoadPlayer  ; if result < SpriteHeight, call subroutine
     lda #0              ; else, set index to 0
-
 .GM_LoadPlayer:
     tay
     lda (GM_PlayerPtr),Y      ; load player bitmap slice of data
@@ -276,12 +314,24 @@ Scanline:
     lda (GM_PlayerColorPtr),Y       ; load player color from lookup table
     sta COLUP0          ; set color for player 0 slice
 
+    txa                 ; transfer X to A
+    sec                 ; make sure carry flag is set
+    sbc GM_BugYPos   ; subtract sprite Y coordinate
+    cmp GAME_PLAYER_HEIGHT   ; are we inside the sprite height bounds?
+    bcc .GM_LoadBug  ; if result < SpriteHeight, call subroutine
+    lda #0              ; else, set index to 0
+.GM_LoadBug:
+    tay
+    lda GM_BUG,Y      ; load player bitmap slice of data
+
     sta WSYNC           ; wait for next scanline
 
+    sta GRP1            ; set graphics for player 0 slice
+    lda (GM_BugColorPtr),Y       ; load player color from lookup table
+    sta COLUP1          ; set color for player 0 slice
+
     dex
-    bne Scanline        ; repeat next scanline until finished
-
-
+    bne .GM_KernelLoop   ; repeat next scanline until finished
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Handle overscan - 30 scanlines
@@ -289,7 +339,7 @@ Scanline:
 .GM_OverScanWait:
     lda #2              ; A = 2 = #%00000010
     sta VBLANK          ; Turn on VBLANK
-    ldx #29             ; X = 30-1
+    ldx #28             ; X = 30-2
     WAIT_X_WSYNC        ; Wait for X scanlines
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -302,36 +352,18 @@ Scanline:
     jmp Reset
 .GM_NoReset:
 
-    lda #%00000010
+    lda SWCHB
+
+    lda #%01000000
     bit SWCHB
-    bne .GM_NoSelect
-
-    lda GM_SelectActive
-    cmp #0
-    bne .GM_SelectDone
-
-    lda #1
-    sta GM_SelectActive
-
-    lda #2
-    eor SWCHB
-    sta SWCHB
-
-    lda #1
-    eor GM_PlayerMode
-    sta GM_PlayerMode
-    cmp #0
-    beq .GM_SET_DRESS
-.GM_SET_PANTS:
+    beq .GM_SetDress
+.GM_SetPants:
     SET_POINTER GM_PlayerPtr, GM_PANTS_IDLE
-    jmp .GM_SelectDone
-.GM_SET_DRESS:
+    jmp .GM_DificultyDone
+.GM_SetDress:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
-    jmp .GM_SelectDone
-.GM_NoSelect:
-    lda #0
-    sta GM_SelectActive
-.GM_SelectDone:
+.GM_DificultyDone:
+    sta WSYNC
 
 .GM_CheckUp:
     lda #%00010000
@@ -368,32 +400,6 @@ Scanline:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subruotines
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; SetObjectXPos
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; A : Contains the the desired x-coordinate
-;; Y=0 : Player0
-;; Y=1 : Player1
-;; Y=2 : Missile0
-;; Y=3 : Missile1
-;; Y=4 : Ball
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-SetObjectXPos subroutine
-    sta WSYNC               ; Get fresh scanline
-    sec                     ; Set carry flag
-.Div15Loop                  ; Divide A with 15 by subtraction in loop
-    sbc #15                 ; Subtract 15 from A
-    bcs .Div15Loop          ; Loop if carry flag is set
-    eor #7                  ; Adjust the remainder in A between -8 and 7
-    REPEAT 4                ; Repeat 4 times
-        asl                 ; Shift bits left by one
-    REPEND                  ; End of repeat
-    sta HMP0,Y              ; Set fine position value for object HMP0+Y
-    sta RESP0,Y             ; Seset rough position for object HMP0+Y
-    
-    rts                     ; Return from subroutine
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup tabes
@@ -484,6 +490,16 @@ GM_PANTS_WALK2:
         .byte #%00011000;$F4
         .byte #%00111100;$00
         .byte #%00011000;$00
+GM_BUG:
+        .byte #0
+        .byte #%00000000;$00
+        .byte #%10101001;$F0
+        .byte #%01011010;$F0
+        .byte #%01111100;$F0
+        .byte #%01111100;$F4
+        .byte #%01011010;$F2
+        .byte #%10101001;$F0
+        .byte #%00000000;$00        
 ;---End Graphics Data---
 
 
@@ -498,7 +514,6 @@ GM_PLAYER_COLOR:
         .byte #$F4;
         .byte #$00;
         .byte #$00;
-
 GM_PLAYER_BW:
         .byte #0
         .byte #$0;
@@ -509,6 +524,27 @@ GM_PLAYER_BW:
         .byte #$04;
         .byte #$00;
         .byte #$00;
+GM_BUG_COLOR:
+        .byte #0
+        .byte #$00;
+        .byte #$F0;
+        .byte #$F0;
+        .byte #$F0;
+        .byte #$F4;
+        .byte #$F2;
+        .byte #$F0;
+        .byte #$00;
+GM_BUG_BW:
+        .byte #0
+        .byte #$00;
+        .byte #$00;
+        .byte #$00;
+        .byte #$00;
+        .byte #$04;
+        .byte #$02;
+        .byte #$00;
+        .byte #$00;
+
 
 ;---End Color Data---
 
