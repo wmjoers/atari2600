@@ -55,6 +55,9 @@ LOGO_FADE_DELAY = #20
 GAME_BK_BW = #$08
 GAME_PLAYER_HEIGHT = #9
 
+GAME_PLAYER_X_MIN = #2
+GAME_PLAYER_X_MAX = #132
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RAM variables located outside ROM at address $0080
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -259,6 +262,9 @@ GM_NextFrame:
     sta WSYNC               ; Wait for next scanline
     sta HMOVE               ; Apply the fine position offset
 
+    lda #1
+    sta CTRLPF
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Wait for the remining scanlines - Total 37
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -275,18 +281,18 @@ GM_NextFrame:
 .GM_Color:
     lda #$C8           
     sta COLUBK
-    lda LOGO_COLOR
+    lda #$C0
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR
-    ; SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
+    SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
     jmp .GM_ColorDone
 .GM_BW:
     lda GAME_BK_BW
     sta COLUBK
-    lda LOGO_COLOR
+    lda #$02
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW
-    ; SET_POINTER GM_BugColorPtr, GM_BUG_BW
+    SET_POINTER GM_BugColorPtr, GM_BUG_BW
 .GM_ColorDone:
     sta WSYNC
 
@@ -297,6 +303,15 @@ GM_NextFrame:
     ldx #96            ; X counter contains the remaining scanlines
 
 .GM_KernelLoop:
+    ldy 0
+    lda GM_PLAYFIELD,Y
+    sta PF0
+    iny
+    lda GM_PLAYFIELD,Y
+    sta PF1
+    iny
+    lda GM_PLAYFIELD,Y
+    sta PF2
 
     txa                 ; transfer X to A
     sec                 ; make sure carry flag is set
@@ -381,12 +396,19 @@ GM_NextFrame:
     lda #%01000000
     bit SWCHA
     bne .GM_CheckRight
+
+    lda GAME_PLAYER_X_MIN
+    cmp GM_PlayerXPos
+    beq .GM_CheckRight
     dec GM_PlayerXPos
 
 .GM_CheckRight:
     lda #%10000000
     bit SWCHA
     bne .GM_NoInput
+    lda #132
+    cmp GM_PlayerXPos
+    beq .GM_NoInput
     inc GM_PlayerXPos
 
 .GM_NoInput:
@@ -544,7 +566,8 @@ GM_BUG_BW:
         .byte #$02;
         .byte #$00;
         .byte #$00;
-
+GM_PLAYFIELD:
+    .byte $70,$00,$00
 
 ;---End Color Data---
 
