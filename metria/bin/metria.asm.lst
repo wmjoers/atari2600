@@ -392,32 +392,43 @@
      17  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      18  0000 ????						;; Contants
      19  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     20  0000 ????	       00 38	   LOGO_BACKGROUND_COLOR =	#$38
-     21  0000 ????	       00 08	   LOGO_BACKGROUND_BW =	#$08
-     22  0000 ????	       00 0e	   LOGO_COLOR =	#$0E
-     23  0000 ????	       00 18	   LOGO_LINE  =	#24
-     24  0000 ????	       00 09	   LOGO_HEIGHT =	#9
-     25  0000 ????	       00 28	   LOGO_FADE_INITIAL_DELAY =	40
-     26  0000 ????	       00 14	   LOGO_FADE_DELAY =	20
-     27  0000 ????
-     28  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     29  0000 ????						;; RAM variables located outside ROM at address $0080
-     30  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     20  0000 ????
+     21  0000 ????	       00 38	   LOGO_BACKGROUND_COLOR =	#$38
+     22  0000 ????	       00 08	   LOGO_BACKGROUND_BW =	#$08
+     23  0000 ????	       00 0e	   LOGO_COLOR =	#$0E
+     24  0000 ????	       00 18	   LOGO_LINE  =	#24
+     25  0000 ????	       00 09	   LOGO_HEIGHT =	#9
+     26  0000 ????	       00 28	   LOGO_FADE_INITIAL_DELAY =	#40
+     27  0000 ????	       00 14	   LOGO_FADE_DELAY =	#20
+     28  0000 ????
+     29  0000 ????	       00 08	   GAME_BK_BW =	#$08
+     30  0000 ????	       00 09	   GAME_PLAYER_HEIGHT =	#9
      31  0000 ????
-     32 U0082 ????				      seg.u	variables
-     33 U0080					      org	$80
-     34 U0080
-     35 U0080		       00	   LM_LogoFade ds	1
-     36 U0081		       00	   LM_LogoTick ds	1
-     37 U0082
-     38 U0082							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     39 U0082							;; Program start - Located at top of ROM at address $F000
-     40 U0082							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     32  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     33  0000 ????						;; RAM variables located outside ROM at address $0080
+     34  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     35  0000 ????
+     36 U008a ????				      seg.u	variables
+     37 U0080					      org	$80
+     38 U0080
+     39 U0080		       00	   LM_LogoFade ds	1
+     40 U0081		       00	   LM_LogoTick ds	1
      41 U0082
-     42  10000 ????				       seg	code
-     43  f000					      org	$F000
-     44  f000
-     45  f000				   Reset
+     42 U0082		       00 00	   GM_PlayerPtr ds	2
+     43 U0084		       00 00	   GM_PlayerColorPtr ds	2
+     44 U0086		       00	   GM_PlayerXPos ds	1
+     45 U0087		       00	   GM_PlayerYPos ds	1
+     46 U0088		       00	   GM_PlayerMode ds	1
+     47 U0089		       00	   GM_SelectActive ds	1
+     48 U008a
+     49 U008a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     50 U008a							;; Program start - Located at top of ROM at address $F000
+     51 U008a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     52 U008a
+     53  10000 ????				       seg	code
+     54  f000					      org	$F000
+     55  f000
+     56  f000				   Reset
       0  f000					      CLEAN_START
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -434,356 +445,556 @@
      13  f007		       48		      pha
      14  f008		       d0 fb		      bne	.CLEAR_STACK
      15  f00a
-     47  f00a
-     48  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     49  f00a							;; Init variables
-     50  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     51  f00a
-     52  f00a		       a9 04		      lda	#4
-     53  f00c		       85 80		      sta	LM_LogoFade
-     54  f00e
-     55  f00e		       a5 28		      lda	LOGO_FADE_INITIAL_DELAY
-     56  f010		       85 81		      sta	LM_LogoTick
-     57  f012
-     58  f012							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     59  f012							;; MODE: LOGO - Start new frame
-     60  f012							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     61  f012				   LM_NextFrame
-     62  f012		       a9 02		      lda	#2	; A = 2 = #%00000010
-     63  f014		       85 01		      sta	VBLANK	; Turn on VBLANK
-      0  f016					      VERTICAL_SYNC		; Vertical sync - 3 scanlines
-      1  f016		       a9 0e		      lda	#%1110
-      2  f018		       85 02	   .VSLP1     sta	WSYNC
-      3  f01a		       85 00		      sta	VSYNC
-      4  f01c		       4a		      lsr
-      5  f01d		       d0 f9		      bne	.VSLP1
-     65  f01f
-     66  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     67  f01f							;; Vertical blank - 37 scanlines total
-     68  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     69  f01f
-     70  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     71  f01f							;; Wait for the remining scanlines - Total 37
-     72  f01f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     73  f01f				   .LM_VBLankWait
-     74  f01f		       a2 25		      ldx	#37	; X = 37
-      0  f021					      WAIT_X_WSYNC		; Wait for X scanlines
-      1  f021				   .WaitX
-      2  f021		       85 02		      sta	WSYNC
-      3  f023		       ca		      dex
-      4  f024		       d0 fb		      bne	.WaitX
-     76  f026
-     77  f026		       a9 00		      lda	#0	; A = 0 = #%00000000
-     78  f028		       85 01		      sta	VBLANK	; Turn off VBLANK
-     79  f02a
-     80  f02a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     81  f02a							;; Draw screen - 192 scanlines - 2 scanline kernel
-     82  f02a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     83  f02a
-     84  f02a		       a5 80		      lda	LM_LogoFade
-     85  f02c		       c9 00		      cmp	#0
-     86  f02e		       f0 0a		      beq	.LM_FadeDone
-     87  f030
-     88  f030		       c6 81		      dec	LM_LogoTick
-     89  f032		       d0 06		      bne	.LM_FadeDone
-     90  f034
-     91  f034		       c6 80		      dec	LM_LogoFade
-     92  f036		       a5 14		      lda	LOGO_FADE_DELAY
-     93  f038		       85 81		      sta	LM_LogoTick
-     94  f03a
-     95  f03a				   .LM_FadeDone
-     96  f03a		       a4 80		      ldy	LM_LogoFade
-     97  f03c
-     98  f03c		       a9 08		      lda	#%00001000
-     99  f03e		       2c 82 02 	      bit	SWCHB
-    100  f041		       f0 0c		      beq	.LM_BW
-    101  f043				   .LM_Color
-    102  f043		       a5 38		      lda	LOGO_BACKGROUND_COLOR
-    103  f045		       85 09		      sta	COLUBK
-    104  f047		       b9 4d f1 	      lda	LM_LogoFade_Color,Y
-    105  f04a		       85 08		      sta	COLUPF
-    106  f04c		       4c 58 f0 	      jmp	.LM_Top
-    107  f04f				   .LM_BW
-    108  f04f		       a5 08		      lda	LOGO_BACKGROUND_BW
-    109  f051		       85 09		      sta	COLUBK
-    110  f053		       b9 52 f1 	      lda	LM_LogoFade_BW,Y
-    111  f056		       85 08		      sta	COLUPF
-    112  f058
-    113  f058				   .LM_Top		; 68
-    114  f058		       a2 44		      ldx	#68
-      0  f05a					      WAIT_X_WSYNC
-      1  f05a				   .WaitX
-      2  f05a		       85 02		      sta	WSYNC
-      3  f05c		       ca		      dex
-      4  f05d		       d0 fb		      bne	.WaitX
-    116  f05f
-    117  f05f				   .LM_Middle		; 36
-    118  f05f		       a0 00		      ldy	#0
-    119  f061				   .LM_LoopY
-    120  f061		       a2 04		      ldx	#4	;
-    121  f063				   .LM_LoopX
-    122  f063		       85 02		      sta	WSYNC
-    123  f065		       b9 17 f1 	      lda	LM_LogoPF0,Y
-    124  f068		       85 0d		      sta	PF0
-    125  f06a		       b9 29 f1 	      lda	LM_LogoPF1,Y
-    126  f06d		       85 0e		      sta	PF1
-    127  f06f		       b9 3b f1 	      lda	LM_LogoPF2,Y
-    128  f072		       85 0f		      sta	PF2
-    129  f074		       c8		      iny
-    130  f075		       b9 17 f1 	      lda	LM_LogoPF0,Y
-    131  f078		       85 0d		      sta	PF0
-    132  f07a		       b9 29 f1 	      lda	LM_LogoPF1,Y
-    133  f07d		       85 0e		      sta	PF1
-    134  f07f		       b9 3b f1 	      lda	LM_LogoPF2,Y
-    135  f082		       88		      dey
-    136  f083		       ea		      nop
-    137  f084		       85 0f		      sta	PF2
-    138  f086
-    139  f086		       ca		      dex
-    140  f087		       d0 da		      bne	.LM_LoopX
-    141  f089		       c8		      iny
-    142  f08a		       c8		      iny
-    143  f08b		       98		      tya
-    144  f08c		       c9 12		      cmp	#18
-    145  f08e		       d0 d1		      bne	.LM_LoopY
-    146  f090				   .LM_TurnOffLogo
-    147  f090		       a5 02		      lda	WSYNC	; 1
-    148  f092		       a9 00		      lda	#0
-    149  f094		       85 0d		      sta	PF0
-    150  f096		       85 0e		      sta	PF1
-    151  f098		       85 0f		      sta	PF2
-    152  f09a
-    153  f09a				   .LM_Bottom
-    154  f09a		       a2 57		      ldx	#87	; 87
-      0  f09c					      WAIT_X_WSYNC
-      1  f09c				   .WaitX
-      2  f09c		       85 02		      sta	WSYNC
-      3  f09e		       ca		      dex
-      4  f09f		       d0 fb		      bne	.WaitX
-    156  f0a1
-    157  f0a1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    158  f0a1							;; Handle overscan - 30 scanlines
-    159  f0a1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    160  f0a1				   .LM_OverScanWait
-    161  f0a1		       a9 02		      lda	#2	; A = 2 = #%00000010
-    162  f0a3		       85 01		      sta	VBLANK	; Turn on VBLANK
-    163  f0a5		       a2 1d		      ldx	#29	; X = 30-1
-      0  f0a7					      WAIT_X_WSYNC		; Wait for X scanlines
-      1  f0a7				   .WaitX
-      2  f0a7		       85 02		      sta	WSYNC
-      3  f0a9		       ca		      dex
-      4  f0aa		       d0 fb		      bne	.WaitX
-    165  f0ac
-    166  f0ac							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    167  f0ac							;; Check input
-    168  f0ac							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    169  f0ac
-    170  f0ac		       a9 01		      lda	#%00000001
-    171  f0ae		       2c 82 02 	      bit	SWCHB
-    172  f0b1		       d0 03		      bne	.LM_NoReset
-    173  f0b3		       4c 00 f0 	      jmp	Reset
-    174  f0b6				   .LM_NoReset
-    175  f0b6
-    176  f0b6		       a9 80		      lda	#%10000000
-    177  f0b8		       24 0c		      bit	INPT4
-    178  f0ba		       d0 03		      bne	.LM_NoFireButton
-    179  f0bc		       4c c4 f0 	      jmp	GM_NextFrame
-    180  f0bf				   .LM_NoFireButton
-    181  f0bf		       85 02		      sta	WSYNC
-    182  f0c1
-    183  f0c1		       4c 12 f0 	      jmp	LM_NextFrame
-    184  f0c4
-    185  f0c4
-    186  f0c4							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    187  f0c4							;; MODE: GAME - Start new frame
-    188  f0c4							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    189  f0c4				   GM_NextFrame
-    190  f0c4		       a9 02		      lda	#2	; A = 2 = #%00000010
-    191  f0c6		       85 01		      sta	VBLANK	; Turn on VBLANK
-      0  f0c8					      VERTICAL_SYNC		; Vertical sync - 3 scanlines
-      1  f0c8		       a9 0e		      lda	#%1110
-      2  f0ca		       85 02	   .VSLP1     sta	WSYNC
-      3  f0cc		       85 00		      sta	VSYNC
-      4  f0ce		       4a		      lsr
-      5  f0cf		       d0 f9		      bne	.VSLP1
-    193  f0d1
-    194  f0d1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    195  f0d1							;; Vertical blank - 37 scanlines total
-    196  f0d1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    197  f0d1
-    198  f0d1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    199  f0d1							;; Wait for the remining scanlines - Total 37
-    200  f0d1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    201  f0d1				   .GM_VBLankWait
-    202  f0d1		       a2 25		      ldx	#37	; X = 37
-      0  f0d3					      WAIT_X_WSYNC		; Wait for X scanlines
-      1  f0d3				   .WaitX
-      2  f0d3		       85 02		      sta	WSYNC
-      3  f0d5		       ca		      dex
-      4  f0d6		       d0 fb		      bne	.WaitX
-    204  f0d8
-    205  f0d8		       a9 00		      lda	#0	; A = 0 = #%00000000
-    206  f0da		       85 01		      sta	VBLANK	; Turn off VBLANK
-    207  f0dc
-    208  f0dc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    209  f0dc							;; Draw screen - 192 scanlines
-    210  f0dc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    211  f0dc
-    212  f0dc		       a9 08		      lda	#%00001000
-    213  f0de		       2c 82 02 	      bit	SWCHB
-    214  f0e1		       f0 0b		      beq	.GM_BW
-    215  f0e3				   .GM_Color
-    216  f0e3		       a5 38		      lda	LOGO_BACKGROUND_COLOR
-    217  f0e5		       85 09		      sta	COLUBK
-    218  f0e7		       a5 0e		      lda	LOGO_COLOR
-    219  f0e9		       85 08		      sta	COLUPF
-    220  f0eb		       4c f6 f0 	      jmp	.GM_ColorDone
-    221  f0ee				   .GM_BW
-    222  f0ee		       a5 08		      lda	LOGO_BACKGROUND_BW
-    223  f0f0		       85 09		      sta	COLUBK
-    224  f0f2		       a5 0e		      lda	LOGO_COLOR
-    225  f0f4		       85 08		      sta	COLUPF
-    226  f0f6				   .GM_ColorDone
-    227  f0f6
-    228  f0f6		       a2 c0		      ldx	#192
-      0  f0f8					      WAIT_X_WSYNC
-      1  f0f8				   .WaitX
-      2  f0f8		       85 02		      sta	WSYNC
-      3  f0fa		       ca		      dex
-      4  f0fb		       d0 fb		      bne	.WaitX
-    230  f0fd
-    231  f0fd							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    232  f0fd							;; Handle overscan - 30 scanlines
-    233  f0fd							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    234  f0fd				   .GM_OverScanWait
-    235  f0fd		       a9 02		      lda	#2	; A = 2 = #%00000010
-    236  f0ff		       85 01		      sta	VBLANK	; Turn on VBLANK
-    237  f101		       a2 1d		      ldx	#29	; X = 30-1
-      0  f103					      WAIT_X_WSYNC		; Wait for X scanlines
-      1  f103				   .WaitX
-      2  f103		       85 02		      sta	WSYNC
-      3  f105		       ca		      dex
-      4  f106		       d0 fb		      bne	.WaitX
-    239  f108
-    240  f108							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    241  f108							;; Check input
-    242  f108							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    243  f108
-    244  f108		       a9 01		      lda	#%00000001
-    245  f10a		       2c 82 02 	      bit	SWCHB
-    246  f10d		       d0 03		      bne	.GM_NoReset
-    247  f10f		       4c 00 f0 	      jmp	Reset
-    248  f112				   .GM_NoReset
-    249  f112		       85 02		      sta	WSYNC
-    250  f114
-    251  f114		       4c c4 f0 	      jmp	GM_NextFrame
-    252  f117
-    253  f117
-    254  f117
-    255  f117
-    256  f117							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    257  f117							;; Lookup tabes
-    258  f117							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    259  f117
-    260  f117							; https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/
-    261  f117							; mode: asymmetric repeat line-height 4
-    262  f117				   LM_LogoPF0
-    263  f117		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$00,$00,$00,$90
-    264  f11f		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$40,$00,$40
-    265  f127		       00 70		      .byte.b	$00,$70
-    266  f129				   LM_LogoPF1
-    267  f129		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$00,$05,$DE
-    268  f131		       0a 42 0a 4e*	      .byte.b	$0A,$42,$0A,$4E,$08,$52,$08,$56
-    269  f139		       38 7b		      .byte.b	$38,$7B
-    270  f13b				   LM_LogoPF2
-    271  f13b		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$80,$00,$F8,$00
-    272  f143		       a5 00 a5 00*	      .byte.b	$A5,$00,$A5,$00,$BF,$00,$85,$00
-    273  f14b		       39 03		      .byte.b	$39,$03
-    274  f14d
-    275  f14d				   LM_LogoFade_Color
-    276  f14d		       0e 3e 3c 3a*	      .byte.b	$0E,$3E,$3C,$3A,$38
-    277  f152
-    278  f152				   LM_LogoFade_BW
-    279  f152		       0e 0e 0c 0a*	      .byte.b	$0E,$0E,$0C,$0A,$08
-    280  f157
-    281  f157
-    282  f157							;---Graphics Data from PlayerPal 2600---
-    283  f157							; BGCOLOR = $C8
-    284  f157
-    285  f157				   GM_DRESS_IDLE
-    286  f157		       7e		      .byte.b	#%01111110	;$70
-    287  f158		       7e		      .byte.b	#%01111110	;$70
-    288  f159		       3c		      .byte.b	#%00111100	;$70
-    289  f15a		       5a		      .byte.b	#%01011010	;$84
-    290  f15b		       7e		      .byte.b	#%01111110	;$84
-    291  f15c		       18		      .byte.b	#%00011000	;$F4
-    292  f15d		       3c		      .byte.b	#%00111100	;$00
-    293  f15e		       18		      .byte.b	#%00011000	;$00
-    294  f15f				   GM_DRESS_WALK1
-    295  f15f		       78		      .byte.b	#%01111000	;$70
-    296  f160		       7e		      .byte.b	#%01111110	;$70
-    297  f161		       3c		      .byte.b	#%00111100	;$70
-    298  f162		       1a		      .byte.b	#%00011010	;$84
-    299  f163		       7e		      .byte.b	#%01111110	;$84
-    300  f164		       18		      .byte.b	#%00011000	;$F4
-    301  f165		       3c		      .byte.b	#%00111100	;$00
-    302  f166		       18		      .byte.b	#%00011000	;$00
-    303  f167				   GM_DRESS_WALK2
-    304  f167		       1e		      .byte.b	#%00011110	;$70
-    305  f168		       7e		      .byte.b	#%01111110	;$70
-    306  f169		       3c		      .byte.b	#%00111100	;$70
-    307  f16a		       58		      .byte.b	#%01011000	;$84
-    308  f16b		       7e		      .byte.b	#%01111110	;$84
-    309  f16c		       18		      .byte.b	#%00011000	;$F4
-    310  f16d		       3c		      .byte.b	#%00111100	;$00
-    311  f16e		       18		      .byte.b	#%00011000	;$00
-    312  f16f				   GM_PANTS_IDLE
-    313  f16f		       66		      .byte.b	#%01100110	;$70
-    314  f170		       24		      .byte.b	#%00100100	;$70
-    315  f171		       3c		      .byte.b	#%00111100	;$70
-    316  f172		       5a		      .byte.b	#%01011010	;$84
-    317  f173		       7e		      .byte.b	#%01111110	;$84
-    318  f174		       18		      .byte.b	#%00011000	;$F4
-    319  f175		       3c		      .byte.b	#%00111100	;$00
-    320  f176		       18		      .byte.b	#%00011000	;$00
-    321  f177				   GM_PANTS_WALK1
-    322  f177		       60		      .byte.b	#%01100000	;$70
-    323  f178		       26		      .byte.b	#%00100110	;$70
-    324  f179		       3c		      .byte.b	#%00111100	;$70
-    325  f17a		       1a		      .byte.b	#%00011010	;$84
-    326  f17b		       7e		      .byte.b	#%01111110	;$84
-    327  f17c		       18		      .byte.b	#%00011000	;$F4
-    328  f17d		       3c		      .byte.b	#%00111100	;$00
-    329  f17e		       18		      .byte.b	#%00011000	;$00
-    330  f17f				   GM_PANTS_WALK2
-    331  f17f		       06		      .byte.b	#%00000110	;$70
-    332  f180		       64		      .byte.b	#%01100100	;$70
-    333  f181		       3c		      .byte.b	#%00111100	;$70
-    334  f182		       58		      .byte.b	#%01011000	;$84
-    335  f183		       7e		      .byte.b	#%01111110	;$84
-    336  f184		       18		      .byte.b	#%00011000	;$F4
-    337  f185		       3c		      .byte.b	#%00111100	;$00
-    338  f186		       18		      .byte.b	#%00011000	;$00
-    339  f187							;---End Graphics Data---
-    340  f187
-    341  f187
-    342  f187							;---Color Data from PlayerPal 2600---
-    343  f187				   GM_PLAYER_COLORS
-    344  f187		       70		      .byte.b	#$70	;
-    345  f188		       70		      .byte.b	#$70	;
-    346  f189		       70		      .byte.b	#$70	;
-    347  f18a		       84		      .byte.b	#$84	;
-    348  f18b		       84		      .byte.b	#$84	;
-    349  f18c		       f4		      .byte.b	#$F4	;
-    350  f18d		       00		      .byte.b	#$00	;
-    351  f18e		       00		      .byte.b	#$00	;
-    352  f18f							;---End Color Data---
-    353  f18f
-    354  f18f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    355  f18f							;; Fill the 4K ROM
-    356  f18f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    357  fffc					      org	$FFFC
-    358  fffc		       00 f0		      .word.w	Reset	; Reset vector
-    359  fffe		       00 f0		      .word.w	Reset	; Interrupt Vector
-    360  10000
-    361  10000
+     58  f00a
+     59  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     60  f00a							;; Init variables
+     61  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     62  f00a
+     63  f00a		       a9 04		      lda	#4
+     64  f00c		       85 80		      sta	LM_LogoFade
+     65  f00e		       a5 28		      lda	LOGO_FADE_INITIAL_DELAY
+     66  f010		       85 81		      sta	LM_LogoTick
+     67  f012
+      0  f012					      SET_POINTER	GM_PlayerPtr, GM_DRESS_IDLE
+      1  f012				   .POINTER   SET	GM_PlayerPtr
+      2  f012				   .ADDRESS   SET	GM_DRESS_IDLE
+      3  f012
+      4  f012		       a9 1c		      LDA	#<.ADDRESS
+      5  f014		       85 82		      STA	.POINTER
+      6  f016		       a9 f2		      LDA	#>.ADDRESS
+      7  f018		       85 83		      STA	.POINTER+1
+      8  f01a
+      0  f01a					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_COLOR
+      1  f01a				   .POINTER   SET	GM_PlayerColorPtr
+      2  f01a				   .ADDRESS   SET	GM_PLAYER_COLOR
+      3  f01a
+      4  f01a		       a9 52		      LDA	#<.ADDRESS
+      5  f01c		       85 84		      STA	.POINTER
+      6  f01e		       a9 f2		      LDA	#>.ADDRESS
+      7  f020		       85 85		      STA	.POINTER+1
+      8  f022
+     70  f022
+     71  f022		       a9 43		      lda	#67
+     72  f024		       85 86		      sta	GM_PlayerXPos
+     73  f026		       a9 2e		      lda	#46
+     74  f028		       85 87		      sta	GM_PlayerYPos
+     75  f02a		       a9 00		      lda	#0
+     76  f02c		       85 88		      sta	GM_PlayerMode
+     77  f02e		       a9 00		      lda	#0
+     78  f030		       85 89		      sta	GM_SelectActive
+     79  f032
+     80  f032							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     81  f032							;; MODE: LOGO - Start new frame
+     82  f032							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     83  f032				   LM_NextFrame
+     84  f032		       a9 02		      lda	#2	; A = 2 = #%00000010
+     85  f034		       85 01		      sta	VBLANK	; Turn on VBLANK
+      0  f036					      VERTICAL_SYNC		; Vertical sync - 3 scanlines
+      1  f036		       a9 0e		      lda	#%1110
+      2  f038		       85 02	   .VSLP1     sta	WSYNC
+      3  f03a		       85 00		      sta	VSYNC
+      4  f03c		       4a		      lsr
+      5  f03d		       d0 f9		      bne	.VSLP1
+     87  f03f
+     88  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     89  f03f							;; Vertical blank - 37 scanlines total
+     90  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     91  f03f
+     92  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     93  f03f							;; Wait for the remining scanlines - Total 37
+     94  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     95  f03f				   .LM_VBLankWait
+     96  f03f		       a2 25		      ldx	#37	; X = 37
+      0  f041					      WAIT_X_WSYNC		; Wait for X scanlines
+      1  f041				   .WaitX
+      2  f041		       85 02		      sta	WSYNC
+      3  f043		       ca		      dex
+      4  f044		       d0 fb		      bne	.WaitX
+     98  f046
+     99  f046		       a9 00		      lda	#0	; A = 0 = #%00000000
+    100  f048		       85 01		      sta	VBLANK	; Turn off VBLANK
+    101  f04a
+    102  f04a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    103  f04a							;; Draw screen - 192 scanlines - 2 scanline kernel
+    104  f04a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    105  f04a
+    106  f04a		       a5 80		      lda	LM_LogoFade
+    107  f04c		       c9 00		      cmp	#0
+    108  f04e		       f0 0a		      beq	.LM_FadeDone
+    109  f050
+    110  f050		       c6 81		      dec	LM_LogoTick
+    111  f052		       d0 06		      bne	.LM_FadeDone
+    112  f054
+    113  f054		       c6 80		      dec	LM_LogoFade
+    114  f056		       a5 14		      lda	LOGO_FADE_DELAY
+    115  f058		       85 81		      sta	LM_LogoTick
+    116  f05a
+    117  f05a				   .LM_FadeDone
+    118  f05a		       a4 80		      ldy	LM_LogoFade
+    119  f05c
+    120  f05c		       a9 08		      lda	#%00001000
+    121  f05e		       2c 82 02 	      bit	SWCHB
+    122  f061		       f0 0c		      beq	.LM_BW
+    123  f063				   .LM_Color
+    124  f063		       a5 38		      lda	LOGO_BACKGROUND_COLOR
+    125  f065		       85 09		      sta	COLUBK
+    126  f067		       b9 12 f2 	      lda	LM_LogoFade_Color,Y
+    127  f06a		       85 08		      sta	COLUPF
+    128  f06c		       4c 78 f0 	      jmp	.LM_Top
+    129  f06f				   .LM_BW
+    130  f06f		       a5 08		      lda	LOGO_BACKGROUND_BW
+    131  f071		       85 09		      sta	COLUBK
+    132  f073		       b9 17 f2 	      lda	LM_LogoFade_BW,Y
+    133  f076		       85 08		      sta	COLUPF
+    134  f078
+    135  f078				   .LM_Top		; 68
+    136  f078		       a2 44		      ldx	#68
+      0  f07a					      WAIT_X_WSYNC
+      1  f07a				   .WaitX
+      2  f07a		       85 02		      sta	WSYNC
+      3  f07c		       ca		      dex
+      4  f07d		       d0 fb		      bne	.WaitX
+    138  f07f
+    139  f07f				   .LM_Middle		; 36
+    140  f07f		       a0 00		      ldy	#0
+    141  f081				   .LM_LoopY
+    142  f081		       a2 04		      ldx	#4	;
+    143  f083				   .LM_LoopX
+    144  f083		       85 02		      sta	WSYNC
+    145  f085		       b9 dc f1 	      lda	LM_LogoPF0,Y
+    146  f088		       85 0d		      sta	PF0
+    147  f08a		       b9 ee f1 	      lda	LM_LogoPF1,Y
+    148  f08d		       85 0e		      sta	PF1
+    149  f08f		       b9 00 f2 	      lda	LM_LogoPF2,Y
+    150  f092		       85 0f		      sta	PF2
+    151  f094		       c8		      iny
+    152  f095		       b9 dc f1 	      lda	LM_LogoPF0,Y
+    153  f098		       85 0d		      sta	PF0
+    154  f09a		       b9 ee f1 	      lda	LM_LogoPF1,Y
+    155  f09d		       85 0e		      sta	PF1
+    156  f09f		       b9 00 f2 	      lda	LM_LogoPF2,Y
+    157  f0a2		       88		      dey
+    158  f0a3		       ea		      nop
+    159  f0a4		       85 0f		      sta	PF2
+    160  f0a6
+    161  f0a6		       ca		      dex
+    162  f0a7		       d0 da		      bne	.LM_LoopX
+    163  f0a9		       c8		      iny
+    164  f0aa		       c8		      iny
+    165  f0ab		       98		      tya
+    166  f0ac		       c9 12		      cmp	#18
+    167  f0ae		       d0 d1		      bne	.LM_LoopY
+    168  f0b0				   .LM_TurnOffLogo
+    169  f0b0		       a5 02		      lda	WSYNC	; 1
+    170  f0b2		       a9 00		      lda	#0
+    171  f0b4		       85 0d		      sta	PF0
+    172  f0b6		       85 0e		      sta	PF1
+    173  f0b8		       85 0f		      sta	PF2
+    174  f0ba
+    175  f0ba				   .LM_Bottom
+    176  f0ba		       a2 57		      ldx	#87	; 87
+      0  f0bc					      WAIT_X_WSYNC
+      1  f0bc				   .WaitX
+      2  f0bc		       85 02		      sta	WSYNC
+      3  f0be		       ca		      dex
+      4  f0bf		       d0 fb		      bne	.WaitX
+    178  f0c1
+    179  f0c1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    180  f0c1							;; Handle overscan - 30 scanlines
+    181  f0c1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    182  f0c1				   .LM_OverScanWait
+    183  f0c1		       a9 02		      lda	#2	; A = 2 = #%00000010
+    184  f0c3		       85 01		      sta	VBLANK	; Turn on VBLANK
+    185  f0c5		       a2 1d		      ldx	#29	; X = 30-1
+      0  f0c7					      WAIT_X_WSYNC		; Wait for X scanlines
+      1  f0c7				   .WaitX
+      2  f0c7		       85 02		      sta	WSYNC
+      3  f0c9		       ca		      dex
+      4  f0ca		       d0 fb		      bne	.WaitX
+    187  f0cc
+    188  f0cc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    189  f0cc							;; Check input
+    190  f0cc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    191  f0cc
+    192  f0cc		       a9 01		      lda	#%00000001
+    193  f0ce		       2c 82 02 	      bit	SWCHB
+    194  f0d1		       d0 03		      bne	.LM_NoReset
+    195  f0d3		       4c 00 f0 	      jmp	Reset
+    196  f0d6				   .LM_NoReset
+    197  f0d6
+    198  f0d6		       a9 80		      lda	#%10000000
+    199  f0d8		       24 0c		      bit	INPT4
+    200  f0da		       d0 03		      bne	.LM_NoFireButton
+    201  f0dc		       4c e4 f0 	      jmp	GM_NextFrame
+    202  f0df				   .LM_NoFireButton
+    203  f0df		       85 02		      sta	WSYNC
+    204  f0e1
+    205  f0e1		       4c 32 f0 	      jmp	LM_NextFrame
+    206  f0e4
+    207  f0e4
+    208  f0e4							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    209  f0e4							;; MODE: GAME - Start new frame
+    210  f0e4							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    211  f0e4				   GM_NextFrame
+    212  f0e4		       a9 02		      lda	#2	; A = 2 = #%00000010
+    213  f0e6		       85 01		      sta	VBLANK	; Turn on VBLANK
+      0  f0e8					      VERTICAL_SYNC		; Vertical sync - 3 scanlines
+      1  f0e8		       a9 0e		      lda	#%1110
+      2  f0ea		       85 02	   .VSLP1     sta	WSYNC
+      3  f0ec		       85 00		      sta	VSYNC
+      4  f0ee		       4a		      lsr
+      5  f0ef		       d0 f9		      bne	.VSLP1
+    215  f0f1
+    216  f0f1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    217  f0f1							;; Vertical blank - 37 scanlines total
+    218  f0f1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    219  f0f1
+    220  f0f1		       a5 86		      lda	GM_PlayerXPos
+    221  f0f3		       a0 00		      ldy	#0
+    222  f0f5		       20 c8 f1 	      jsr	SetObjectXPos
+    223  f0f8
+    224  f0f8		       85 02		      sta	WSYNC	; Wait for next scanline
+    225  f0fa		       85 2a		      sta	HMOVE	; Apply the fine position offset
+    226  f0fc
+    227  f0fc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    228  f0fc							;; Wait for the remining scanlines - Total 37
+    229  f0fc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    230  f0fc				   .GM_VBLankWait
+    231  f0fc		       a2 23		      ldx	#35	; X = 37-2
+      0  f0fe					      WAIT_X_WSYNC		; Wait for X scanlines
+      1  f0fe				   .WaitX
+      2  f0fe		       85 02		      sta	WSYNC
+      3  f100		       ca		      dex
+      4  f101		       d0 fb		      bne	.WaitX
+    233  f103
+    234  f103		       a9 00		      lda	#0	; A = 0 = #%00000000
+    235  f105		       85 01		      sta	VBLANK	; Turn off VBLANK
+    236  f107
+    237  f107							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    238  f107							;; Draw screen - 192 scanlines
+    239  f107							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    240  f107
+    241  f107		       a9 08		      lda	#%00001000
+    242  f109		       2c 82 02 	      bit	SWCHB
+    243  f10c		       f0 13		      beq	.GM_BW
+    244  f10e				   .GM_Color
+    245  f10e		       a9 c8		      lda	#$C8
+    246  f110		       85 09		      sta	COLUBK
+    247  f112		       a5 0e		      lda	LOGO_COLOR
+    248  f114		       85 08		      sta	COLUPF
+      0  f116					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_COLOR
+      1  f116				   .POINTER   SET	GM_PlayerColorPtr
+      2  f116				   .ADDRESS   SET	GM_PLAYER_COLOR
+      3  f116
+      4  f116		       a9 52		      LDA	#<.ADDRESS
+      5  f118		       85 84		      STA	.POINTER
+      6  f11a		       a9 f2		      LDA	#>.ADDRESS
+      7  f11c		       85 85		      STA	.POINTER+1
+      8  f11e
+    250  f11e		       4c 31 f1 	      jmp	.GM_ColorDone
+    251  f121				   .GM_BW
+    252  f121		       a5 08		      lda	GAME_BK_BW
+    253  f123		       85 09		      sta	COLUBK
+    254  f125		       a5 0e		      lda	LOGO_COLOR
+    255  f127		       85 08		      sta	COLUPF
+      0  f129					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_BW
+      1  f129				   .POINTER   SET	GM_PlayerColorPtr
+      2  f129				   .ADDRESS   SET	GM_PLAYER_BW
+      3  f129
+      4  f129		       a9 5b		      LDA	#<.ADDRESS
+      5  f12b		       85 84		      STA	.POINTER
+      6  f12d		       a9 f2		      LDA	#>.ADDRESS
+      7  f12f		       85 85		      STA	.POINTER+1
+      8  f131
+    257  f131				   .GM_ColorDone
+    258  f131
+    259  f131		       a2 60		      ldx	#96	; X counter contains the remaining scanlines
+    260  f133
+    261  f133				   Scanline
+    262  f133		       8a		      txa		; transfer X to A
+    263  f134		       38		      sec		; make sure carry flag is set
+    264  f135		       e5 87		      sbc	GM_PlayerYPos	; subtract sprite Y coordinate
+    265  f137		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
+    266  f139		       90 02		      bcc	.GM_LoadPlayer	; if result < SpriteHeight, call subroutine
+    267  f13b		       a9 00		      lda	#0	; else, set index to 0
+    268  f13d
+    269  f13d				   .GM_LoadPlayer
+    270  f13d		       a8		      tay
+    271  f13e		       b1 82		      lda	(GM_PlayerPtr),Y	; load player bitmap slice of data
+    272  f140
+    273  f140		       85 02		      sta	WSYNC	; wait for next scanline
+    274  f142
+    275  f142		       85 1b		      sta	GRP0	; set graphics for player 0 slice
+    276  f144		       b1 84		      lda	(GM_PlayerColorPtr),Y	; load player color from lookup table
+    277  f146		       85 06		      sta	COLUP0	; set color for player 0 slice
+    278  f148
+    279  f148		       85 02		      sta	WSYNC	; wait for next scanline
+    280  f14a
+    281  f14a		       ca		      dex
+    282  f14b		       d0 e6		      bne	Scanline	; repeat next scanline until finished
+    283  f14d
+    284  f14d
+    285  f14d
+    286  f14d							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    287  f14d							;; Handle overscan - 30 scanlines
+    288  f14d							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    289  f14d				   .GM_OverScanWait
+    290  f14d		       a9 02		      lda	#2	; A = 2 = #%00000010
+    291  f14f		       85 01		      sta	VBLANK	; Turn on VBLANK
+    292  f151		       a2 1d		      ldx	#29	; X = 30-1
+      0  f153					      WAIT_X_WSYNC		; Wait for X scanlines
+      1  f153				   .WaitX
+      2  f153		       85 02		      sta	WSYNC
+      3  f155		       ca		      dex
+      4  f156		       d0 fb		      bne	.WaitX
+    294  f158
+    295  f158							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    296  f158							;; Check input
+    297  f158							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    298  f158
+    299  f158		       a9 01		      lda	#%00000001
+    300  f15a		       2c 82 02 	      bit	SWCHB
+    301  f15d		       d0 03		      bne	.GM_NoReset
+    302  f15f		       4c 00 f0 	      jmp	Reset
+    303  f162				   .GM_NoReset
+    304  f162
+    305  f162		       a9 02		      lda	#%00000010
+    306  f164		       2c 82 02 	      bit	SWCHB
+    307  f167		       d0 32		      bne	.GM_NoSelect
+    308  f169
+    309  f169		       a5 89		      lda	GM_SelectActive
+    310  f16b		       c9 00		      cmp	#0
+    311  f16d		       d0 30		      bne	.GM_SelectDone
+    312  f16f
+    313  f16f		       a9 01		      lda	#1
+    314  f171		       85 89		      sta	GM_SelectActive
+    315  f173
+    316  f173		       a9 02		      lda	#2
+    317  f175		       4d 82 02 	      eor	SWCHB
+    318  f178		       8d 82 02 	      sta	SWCHB
+    319  f17b
+    320  f17b		       a9 01		      lda	#1
+    321  f17d		       45 88		      eor	GM_PlayerMode
+    322  f17f		       85 88		      sta	GM_PlayerMode
+    323  f181		       c9 00		      cmp	#0
+    324  f183		       f0 0b		      beq	.GM_SET_DRESS
+    325  f185				   .GM_SET_PANTS
+      0  f185					      SET_POINTER	GM_PlayerPtr, GM_PANTS_IDLE
+      1  f185				   .POINTER   SET	GM_PlayerPtr
+      2  f185				   .ADDRESS   SET	GM_PANTS_IDLE
+      3  f185
+      4  f185		       a9 37		      LDA	#<.ADDRESS
+      5  f187		       85 82		      STA	.POINTER
+      6  f189		       a9 f2		      LDA	#>.ADDRESS
+      7  f18b		       85 83		      STA	.POINTER+1
+      8  f18d
+    327  f18d		       4c 9f f1 	      jmp	.GM_SelectDone
+    328  f190				   .GM_SET_DRESS
+      0  f190					      SET_POINTER	GM_PlayerPtr, GM_DRESS_IDLE
+      1  f190				   .POINTER   SET	GM_PlayerPtr
+      2  f190				   .ADDRESS   SET	GM_DRESS_IDLE
+      3  f190
+      4  f190		       a9 1c		      LDA	#<.ADDRESS
+      5  f192		       85 82		      STA	.POINTER
+      6  f194		       a9 f2		      LDA	#>.ADDRESS
+      7  f196		       85 83		      STA	.POINTER+1
+      8  f198
+    330  f198		       4c 9f f1 	      jmp	.GM_SelectDone
+    331  f19b				   .GM_NoSelect
+    332  f19b		       a9 00		      lda	#0
+    333  f19d		       85 89		      sta	GM_SelectActive
+    334  f19f				   .GM_SelectDone
+    335  f19f
+    336  f19f				   .GM_CheckUp
+    337  f19f		       a9 10		      lda	#%00010000
+    338  f1a1		       2c 80 02 	      bit	SWCHA
+    339  f1a4		       d0 02		      bne	.GM_CheckDown
+    340  f1a6		       e6 87		      inc	GM_PlayerYPos
+    341  f1a8
+    342  f1a8				   .GM_CheckDown
+    343  f1a8		       a9 20		      lda	#%00100000
+    344  f1aa		       2c 80 02 	      bit	SWCHA
+    345  f1ad		       d0 02		      bne	.GM_CheckLeft
+    346  f1af		       c6 87		      dec	GM_PlayerYPos
+    347  f1b1
+    348  f1b1				   .GM_CheckLeft
+    349  f1b1		       a9 40		      lda	#%01000000
+    350  f1b3		       2c 80 02 	      bit	SWCHA
+    351  f1b6		       d0 02		      bne	.GM_CheckRight
+    352  f1b8		       c6 86		      dec	GM_PlayerXPos
+    353  f1ba
+    354  f1ba				   .GM_CheckRight
+    355  f1ba		       a9 80		      lda	#%10000000
+    356  f1bc		       2c 80 02 	      bit	SWCHA
+    357  f1bf		       d0 02		      bne	.GM_NoInput
+    358  f1c1		       e6 86		      inc	GM_PlayerXPos
+    359  f1c3
+    360  f1c3				   .GM_NoInput
+    361  f1c3
+    362  f1c3		       85 02		      sta	WSYNC
+    363  f1c5
+    364  f1c5
+    365  f1c5		       4c e4 f0 	      jmp	GM_NextFrame
+    366  f1c8
+    367  f1c8
+    368  f1c8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    369  f1c8							;; Subruotines
+    370  f1c8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    371  f1c8
+    372  f1c8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    373  f1c8							;; SetObjectXPos
+    374  f1c8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    375  f1c8							;; A : Contains the the desired x-coordinate
+    376  f1c8							;; Y=0 : Player0
+    377  f1c8							;; Y=1 : Player1
+    378  f1c8							;; Y=2 : Missile0
+    379  f1c8							;; Y=3 : Missile1
+    380  f1c8							;; Y=4 : Ball
+    381  f1c8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    382  f1c8
+    383  f1c8				   SetObjectXPos subroutine
+    384  f1c8		       85 02		      sta	WSYNC	; Get fresh scanline
+    385  f1ca		       38		      sec		; Set carry flag
+    386  f1cb				   .Div15Loop		; Divide A with 15 by subtraction in loop
+    387  f1cb		       e9 0f		      sbc	#15	; Subtract 15 from A
+    388  f1cd		       b0 fc		      bcs	.Div15Loop	; Loop if carry flag is set
+    389  f1cf		       49 07		      eor	#7	; Adjust the remainder in A between -8 and 7
+    390  f1d1					      REPEAT	4	; Repeat 4 times
+    391  f1d1		       0a		      asl		; Shift bits left by one
+    390  f1d1					      REPEND		; End of repeat
+    391  f1d2		       0a		      asl		; Shift bits left by one
+    390  f1d2					      REPEND		; End of repeat
+    391  f1d3		       0a		      asl		; Shift bits left by one
+    390  f1d3					      REPEND		; End of repeat
+    391  f1d4		       0a		      asl		; Shift bits left by one
+    392  f1d5					      REPEND		; End of repeat
+    393  f1d5		       99 20 00 	      sta	HMP0,Y	; Set fine position value for object HMP0+Y
+    394  f1d8		       99 10 00 	      sta	RESP0,Y	; Seset rough position for object HMP0+Y
+    395  f1db
+    396  f1db		       60		      rts		; Return from subroutine
+    397  f1dc
+    398  f1dc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    399  f1dc							;; Lookup tabes
+    400  f1dc							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    401  f1dc
+    402  f1dc							; https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/
+    403  f1dc							; mode: asymmetric repeat line-height 4
+    404  f1dc				   LM_LogoPF0
+    405  f1dc		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$00,$00,$00,$90
+    406  f1e4		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$40,$00,$40
+    407  f1ec		       00 70		      .byte.b	$00,$70
+    408  f1ee				   LM_LogoPF1
+    409  f1ee		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$00,$05,$DE
+    410  f1f6		       0a 42 0a 4e*	      .byte.b	$0A,$42,$0A,$4E,$08,$52,$08,$56
+    411  f1fe		       38 7b		      .byte.b	$38,$7B
+    412  f200				   LM_LogoPF2
+    413  f200		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$80,$00,$F8,$00
+    414  f208		       a5 00 a5 00*	      .byte.b	$A5,$00,$A5,$00,$BF,$00,$85,$00
+    415  f210		       39 03		      .byte.b	$39,$03
+    416  f212
+    417  f212				   LM_LogoFade_Color
+    418  f212		       0e 3e 3c 3a*	      .byte.b	$0E,$3E,$3C,$3A,$38
+    419  f217
+    420  f217				   LM_LogoFade_BW
+    421  f217		       0e 0e 0c 0a*	      .byte.b	$0E,$0E,$0C,$0A,$08
+    422  f21c
+    423  f21c
+    424  f21c							;---Graphics Data from PlayerPal 2600---
+    425  f21c							; BGCOLOR = $C8
+    426  f21c
+    427  f21c				   GM_DRESS_IDLE
+    428  f21c		       00		      .byte.b	#0
+    429  f21d		       7e		      .byte.b	#%01111110	;$70
+    430  f21e		       7e		      .byte.b	#%01111110	;$70
+    431  f21f		       3c		      .byte.b	#%00111100	;$70
+    432  f220		       5a		      .byte.b	#%01011010	;$84
+    433  f221		       7e		      .byte.b	#%01111110	;$84
+    434  f222		       18		      .byte.b	#%00011000	;$F4
+    435  f223		       3c		      .byte.b	#%00111100	;$00
+    436  f224		       18		      .byte.b	#%00011000	;$00
+    437  f225				   GM_DRESS_WALK1
+    438  f225		       00		      .byte.b	#0
+    439  f226		       78		      .byte.b	#%01111000	;$70
+    440  f227		       7e		      .byte.b	#%01111110	;$70
+    441  f228		       3c		      .byte.b	#%00111100	;$70
+    442  f229		       1a		      .byte.b	#%00011010	;$84
+    443  f22a		       7e		      .byte.b	#%01111110	;$84
+    444  f22b		       18		      .byte.b	#%00011000	;$F4
+    445  f22c		       3c		      .byte.b	#%00111100	;$00
+    446  f22d		       18		      .byte.b	#%00011000	;$00
+    447  f22e				   GM_DRESS_WALK2
+    448  f22e		       00		      .byte.b	#0
+    449  f22f		       1e		      .byte.b	#%00011110	;$70
+    450  f230		       7e		      .byte.b	#%01111110	;$70
+    451  f231		       3c		      .byte.b	#%00111100	;$70
+    452  f232		       58		      .byte.b	#%01011000	;$84
+    453  f233		       7e		      .byte.b	#%01111110	;$84
+    454  f234		       18		      .byte.b	#%00011000	;$F4
+    455  f235		       3c		      .byte.b	#%00111100	;$00
+    456  f236		       18		      .byte.b	#%00011000	;$00
+    457  f237				   GM_PANTS_IDLE
+    458  f237		       00		      .byte.b	#0
+    459  f238		       66		      .byte.b	#%01100110	;$70
+    460  f239		       24		      .byte.b	#%00100100	;$70
+    461  f23a		       3c		      .byte.b	#%00111100	;$70
+    462  f23b		       5a		      .byte.b	#%01011010	;$84
+    463  f23c		       7e		      .byte.b	#%01111110	;$84
+    464  f23d		       18		      .byte.b	#%00011000	;$F4
+    465  f23e		       3c		      .byte.b	#%00111100	;$00
+    466  f23f		       18		      .byte.b	#%00011000	;$00
+    467  f240				   GM_PANTS_WALK1
+    468  f240		       00		      .byte.b	#0
+    469  f241		       60		      .byte.b	#%01100000	;$70
+    470  f242		       26		      .byte.b	#%00100110	;$70
+    471  f243		       3c		      .byte.b	#%00111100	;$70
+    472  f244		       1a		      .byte.b	#%00011010	;$84
+    473  f245		       7e		      .byte.b	#%01111110	;$84
+    474  f246		       18		      .byte.b	#%00011000	;$F4
+    475  f247		       3c		      .byte.b	#%00111100	;$00
+    476  f248		       18		      .byte.b	#%00011000	;$00
+    477  f249				   GM_PANTS_WALK2
+    478  f249		       00		      .byte.b	#0
+    479  f24a		       06		      .byte.b	#%00000110	;$70
+    480  f24b		       64		      .byte.b	#%01100100	;$70
+    481  f24c		       3c		      .byte.b	#%00111100	;$70
+    482  f24d		       58		      .byte.b	#%01011000	;$84
+    483  f24e		       7e		      .byte.b	#%01111110	;$84
+    484  f24f		       18		      .byte.b	#%00011000	;$F4
+    485  f250		       3c		      .byte.b	#%00111100	;$00
+    486  f251		       18		      .byte.b	#%00011000	;$00
+    487  f252							;---End Graphics Data---
+    488  f252
+    489  f252
+    490  f252							;---Color Data from PlayerPal 2600---
+    491  f252				   GM_PLAYER_COLOR
+    492  f252		       00		      .byte.b	#0
+    493  f253		       70		      .byte.b	#$70	;
+    494  f254		       70		      .byte.b	#$70	;
+    495  f255		       70		      .byte.b	#$70	;
+    496  f256		       84		      .byte.b	#$84	;
+    497  f257		       84		      .byte.b	#$84	;
+    498  f258		       f4		      .byte.b	#$F4	;
+    499  f259		       00		      .byte.b	#$00	;
+    500  f25a		       00		      .byte.b	#$00	;
+    501  f25b
+    502  f25b				   GM_PLAYER_BW
+    503  f25b		       00		      .byte.b	#0
+    504  f25c		       00		      .byte.b	#$0	;
+    505  f25d		       00		      .byte.b	#$0	;
+    506  f25e		       00		      .byte.b	#$0	;
+    507  f25f		       02		      .byte.b	#$02	;
+    508  f260		       02		      .byte.b	#$02	;
+    509  f261		       04		      .byte.b	#$04	;
+    510  f262		       00		      .byte.b	#$00	;
+    511  f263		       00		      .byte.b	#$00	;
+    512  f264
+    513  f264							;---End Color Data---
+    514  f264
+    515  f264							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    516  f264							;; Fill the 4K ROM
+    517  f264							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    518  fffc					      org	$FFFC
+    519  fffc		       00 f0		      .word.w	Reset	; Reset vector
+    520  fffe		       00 f0		      .word.w	Reset	; Interrupt Vector
+    521  10000
+    522  10000

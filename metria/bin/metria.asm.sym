@@ -1,34 +1,56 @@
 --- Symbol List (sorted by symbol)
 0.FREE_BYTES             0000                  
-0.GM_BW                  f0ee              (R )
-0.GM_Color               f0e3                  
-0.GM_ColorDone           f0f6              (R )
-0.GM_NoReset             f112              (R )
-0.GM_OverScanWait        f0fd                  
-0.GM_VBLankWait          f0d1                  
-0.LM_Bottom              f09a                  
-0.LM_BW                  f04f              (R )
-0.LM_Color               f043                  
-0.LM_FadeDone            f03a              (R )
-0.LM_LoopX               f063              (R )
-0.LM_LoopY               f061              (R )
-0.LM_Middle              f05f                  
-0.LM_NoFireButton        f0bf              (R )
-0.LM_NoReset             f0b6              (R )
-0.LM_OverScanWait        f0a1                  
-0.LM_Top                 f058              (R )
-0.LM_TurnOffLogo         f090                  
-0.LM_VBLankWait          f01f                  
+0.GM_BW                  f121              (R )
+0.GM_CheckDown           f1a8              (R )
+0.GM_CheckLeft           f1b1              (R )
+0.GM_CheckRight          f1ba              (R )
+0.GM_CheckUp             f19f                  
+0.GM_Color               f10e                  
+0.GM_ColorDone           f131              (R )
+0.GM_LoadPlayer          f13d              (R )
+0.GM_NoInput             f1c3              (R )
+0.GM_NoReset             f162              (R )
+0.GM_NoSelect            f19b              (R )
+0.GM_OverScanWait        f14d                  
+0.GM_SelectDone          f19f              (R )
+0.GM_SET_DRESS           f190              (R )
+0.GM_SET_PANTS           f185                  
+0.GM_VBLankWait          f0fc                  
+0.LM_Bottom              f0ba                  
+0.LM_BW                  f06f              (R )
+0.LM_Color               f063                  
+0.LM_FadeDone            f05a              (R )
+0.LM_LoopX               f083              (R )
+0.LM_LoopY               f081              (R )
+0.LM_Middle              f07f                  
+0.LM_NoFireButton        f0df              (R )
+0.LM_NoReset             f0d6              (R )
+0.LM_OverScanWait        f0c1                  
+0.LM_Top                 f078              (R )
+0.LM_TurnOffLogo         f0b0                  
+0.LM_VBLankWait          f03f                  
 1.CLEAR_STACK            f005              (R )
-10.WaitX                 f103              (R )
-2.VSLP1                  f018              (R )
-3.WaitX                  f021              (R )
-4.WaitX                  f05a              (R )
-5.WaitX                  f09c              (R )
-6.WaitX                  f0a7              (R )
-7.VSLP1                  f0ca              (R )
-8.WaitX                  f0d3              (R )
-9.WaitX                  f0f8              (R )
+10.WaitX                 f0fe              (R )
+11.ADDRESS               f252              (R )
+11.POINTER               0084              (R )
+12.ADDRESS               f25b              (R )
+12.POINTER               0084              (R )
+13.WaitX                 f153              (R )
+14.ADDRESS               f237              (R )
+14.POINTER               0082              (R )
+15.ADDRESS               f21c              (R )
+15.POINTER               0082              (R )
+16.Div15Loop             f1cb              (R )
+2.ADDRESS                f21c              (R )
+2.POINTER                0082              (R )
+3.ADDRESS                f252              (R )
+3.POINTER                0084              (R )
+4.VSLP1                  f038              (R )
+5.WaitX                  f041              (R )
+6.WaitX                  f07a              (R )
+7.WaitX                  f0bc              (R )
+8.WaitX                  f0c7              (R )
+9.VSLP1                  f0ea              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
@@ -36,7 +58,7 @@ AUDF1                    0018
 AUDV0                    0019                  
 AUDV1                    001a                  
 COLUBK                   0009              (R )
-COLUP0                   0006                  
+COLUP0                   0006              (R )
 COLUP1                   0007                  
 COLUPF                   0008              (R )
 CTRLPF                   000a                  
@@ -52,22 +74,31 @@ CXPPMM                   0007
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
-GM_DRESS_IDLE            f157                  
-GM_DRESS_WALK1           f15f                  
-GM_DRESS_WALK2           f167                  
-GM_NextFrame             f0c4              (R )
-GM_PANTS_IDLE            f16f                  
-GM_PANTS_WALK1           f177                  
-GM_PANTS_WALK2           f17f                  
-GM_PLAYER_COLORS         f187                  
-GRP0                     001b                  
+GAME_BK_BW               0008              (R )
+GAME_PLAYER_HEIGHT       0009              (R )
+GM_DRESS_IDLE            f21c              (R )
+GM_DRESS_WALK1           f225                  
+GM_DRESS_WALK2           f22e                  
+GM_NextFrame             f0e4              (R )
+GM_PANTS_IDLE            f237              (R )
+GM_PANTS_WALK1           f240                  
+GM_PANTS_WALK2           f249                  
+GM_PLAYER_BW             f25b              (R )
+GM_PLAYER_COLOR          f252              (R )
+GM_PlayerColorPtr        0084              (R )
+GM_PlayerMode            0088              (R )
+GM_PlayerPtr             0082              (R )
+GM_PlayerXPos            0086              (R )
+GM_PlayerYPos            0087              (R )
+GM_SelectActive          0089              (R )
+GRP0                     001b              (R )
 GRP1                     001c                  
 HMBL                     0024                  
 HMCLR                    002b                  
 HMM0                     0022                  
 HMM1                     0023                  
-HMOVE                    002a                  
-HMP0                     0020                  
+HMOVE                    002a              (R )
+HMP0                     0020              (R )
 HMP1                     0021                  
 INPT0                    0008                  
 INPT1                    0009                  
@@ -77,13 +108,13 @@ INPT4                    000c              (R )
 INPT5                    000d                  
 INTIM                    0284                  
 LM_LogoFade              0080              (R )
-LM_LogoFade_BW           f152              (R )
-LM_LogoFade_Color        f14d              (R )
-LM_LogoPF0               f117              (R )
-LM_LogoPF1               f129              (R )
-LM_LogoPF2               f13b              (R )
+LM_LogoFade_BW           f217              (R )
+LM_LogoFade_Color        f212              (R )
+LM_LogoPF0               f1dc              (R )
+LM_LogoPF1               f1ee              (R )
+LM_LogoPF2               f200              (R )
 LM_LogoTick              0081              (R )
-LM_NextFrame             f012              (R )
+LM_NextFrame             f032              (R )
 LOGO_BACKGROUND_BW       0008              (R )
 LOGO_BACKGROUND_COLOR    0038              (R )
 LOGO_COLOR               000e              (R )
@@ -105,12 +136,14 @@ RESM0                    0012
 RESM1                    0013                  
 RESMP0                   0028                  
 RESMP1                   0029                  
-RESP0                    0010                  
+RESP0                    0010              (R )
 RESP1                    0011                  
 RSYNC                    0003                  
+Scanline                 f133              (R )
+SetObjectXPos            f1c8              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
-SWCHA                    0280                  
+SWCHA                    0280              (R )
 SWCHB                    0282              (R )
 T1024T                   0297                  
 TIA_BASE_ADDRESS         0000              (R )
