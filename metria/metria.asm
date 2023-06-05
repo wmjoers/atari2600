@@ -24,6 +24,8 @@ LEFT_BTN_MASK = %10000000       ; bitmask for left joystick button
 TIMER_VBLANK = 43               ; value for TIM64T vertical blank timer
 TIMER_OVERSCAN = 35             ; value for TIM64T overscan timer
 
+RANDOM_SEED = $72
+
 LOGO_BK_COLOR = $38             ; logo mode background color - color mode
 LOGO_BK_BW = $06                ; logo mode background color - black & white
 LOGO_FADE_INIT_STATE = 4        ; initial value for the logo fade in state
@@ -40,6 +42,7 @@ GAME_SCOREBOARD_COLOR = $0      ; game score board color - all modes
 
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RAM variables located outside ROM at address $0080
@@ -59,12 +62,17 @@ GM_PlayerColorPtr   ds 2
 GM_PlayerXPos       ds 1
 GM_PlayerYPos       ds 1
 
+GM_BirdPtr          ds 2
+GM_BirdYPos         ds 1
+GM_BirdReflection   ds 1
+
 GM_BugColorPtr      ds 2
 GM_BugXPos          ds 1
 GM_BugYPos          ds 1
 GM_PlayfieldIdx     ds 1
 
 PFCounter           ds 1
+Random              ds 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program start - Located at top of ROM at address $F000
@@ -72,13 +80,16 @@ PFCounter           ds 1
 
     seg code                
     org $F000                   ; start address of ROM
-
+    
 Reset:
     CLEAN_START                 ; set machine to known state on startup
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Init variables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    lda #RANDOM_SEED
+    sta Random
 
     lda #LOGO_FADE_INIT_STATE   
     sta LM_LogoFadeState        ; initialize logo fade state
@@ -90,15 +101,19 @@ Reset:
 
     SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
 
+    SET_POINTER GM_BirdPtr, GM_BIRD_1
+
     lda #62
     sta GM_PlayerXPos
     lda #21
     sta GM_PlayerYPos
 
-    lda #10
-    sta GM_BugXPos
-    lda #10
-    sta GM_BugYPos
+    jsr PlaceBug
+
+    lda #4
+    sta GM_BirdYPos
+    lda #0
+    sta GM_BirdReflection
 
     lda #2
     sta VBLANK                  ; turn on VBLANK 
@@ -164,7 +179,7 @@ LM_NextFrame:
 .LM_Middle                      ; logo is a total of 36 scanlines
     ldy #0                      ; Y = index to playfield bytes
 .LM_LoopY:
-    ldx #4;                     ; draw every logo line 4 scanlines
+    ldx #4                      ; draw every logo line 4 scanlines
 .LM_LoopX:
     sta WSYNC                   ; get fresh scanline
     ; -------------------------
@@ -297,11 +312,17 @@ GM_NextFrame:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
 .GM_SetGraphicsDone:
 
+.GM_CheckCollisions:
+    lda CXPPMM
+    and #%11110000
+    beq .GM_CheckCollisionsDone
+    jsr PlaceBug
+.GM_CheckCollisionsDone:
+    sta CXCLR
+
 .GM_PlayfieldInit
-    lda #1
-    sta VDELP0                  ; set vertical delay för player 0
-    lda #76                     
-    sta PFCounter               ; 152/2 scanelines
+    lda #71                     
+    sta PFCounter               ; 144/2 scanelines
 
 .GM_VBLankWait:
     ldx INTIM
@@ -324,25 +345,50 @@ GM_NextFrame:
     ; -------------------------
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Sky - 20 scanlines - 1520 mc
+;; Sky - 30 scanlines - 1520 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda GM_SkyColor
     sta COLUBK
-    
-    lda #23
-    sta TIM64T                  ; set timer to 35x64 = 2240 mc
+    ldx #15
+    lda #0
+    sta VDELP0                  ; clear vertical delay för player 0
 
-.GM_SkyWait:
-    ldx INTIM
-    bne .GM_SkyWait             ; wait until timer is done
-    sta WSYNC                   ; get a fresh scanline
+    lda GM_BirdReflection
+    sta REFP0
+
+.GM_SkyLoop:
+
+.GM_DrawBird:
+    txa                         ; transfer X to A
+    sec                         ; make sure carry flag is set
+    sbc GM_BirdYPos             ; subtract sprite Y coordinate
+    cmp GAME_PLAYER_HEIGHT      ; are we inside the sprite height bounds?
+    bcc .GM_WriteBird           ; if result < SpriteHeight, call subroutine
+    lda #0                      ; else, set index to 0
+.GM_WriteBird:
+    tay
+    lda (GM_BirdPtr),Y          ; load player bitmap slice of data
+    sta WSYNC                   ; wait for next scanline
+    ; ------------------------- 
+    sta GRP0                    ; set graphics for player 0 slice
+    lda GM_BIRD_COLOR,Y         ; load player color from lookup table
+    sta COLUP0                  ; set color for player 1 slice
+.GM_DrawBirdDone:
+    sta WSYNC                   ; wait for next scanline
     ; -------------------------
+    dex
+    bne .GM_SkyLoop
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Playfield - 152 scanlines - 11552 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda GM_BackgroundColor
     sta COLUBK
+    lda #1
+    sta VDELP0                  ; set vertical delay för player 0
+    lda #0
+    sta REFP0
 
 .GM_PlayfieldLoop:
 
@@ -415,12 +461,16 @@ GM_NextFrame:
     lda #%01000000
     bit SWCHA
     bne .GM_CheckInputRight
+    lda #%00001000
+    sta GM_BirdReflection
     dec GM_PlayerXPos
 
 .GM_CheckInputRight:
     lda #%10000000
     bit SWCHA
     bne .GM_CheckInputDone
+    lda #0
+    sta GM_BirdReflection
     inc GM_PlayerXPos
 
 .GM_CheckInputDone:
@@ -435,6 +485,30 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subruotines
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+PlaceBug subroutine
+    jsr Randomize
+    lda Random
+    and #%01111111
+    sta GM_BugXPos
+    jsr Randomize
+    lda Random
+    and #%00111111
+    sta GM_BugYPos
+    rts
+
+Randomize subroutine
+    lda Random
+    asl
+    eor Random
+    asl
+    eor Random
+    asl
+    asl
+    eor Random
+    asl
+    rol Random               ; performs a series of shifts and bit operations
+    rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SetObjectXPos
@@ -487,204 +561,300 @@ LM_LogoFade_Color:
 LM_LogoFade_BW:
     .byte $0E,$0C,$0A,$08,$06
 
+Digits:
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01010101          ; # # # #
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+
+    .byte %01110111          ; ### ###
+    .byte %00010001          ;   #   #
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01110111          ; ### ###
+
+    .byte %01110111          ; ### ###
+    .byte %00010001          ;   #   #
+    .byte %00110011          ;  ##  ##
+    .byte %00010001          ;   #   #
+    .byte %01110111          ; ### ###
+
+    .byte %01010101          ; # # # #
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01110111          ; ### ###
+    .byte %00010001          ;   #   #
+    .byte %01110111          ; ### ###
+
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+
+    .byte %01110111          ; ### ###
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+    .byte %00010001          ;   #   #
+
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+    .byte %00010001          ;   #   #
+    .byte %01110111          ; ### ###
+
+    .byte %00100010          ;  #   #
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01010101          ; # # # #
+
+    .byte %01110111          ; ### ###
+    .byte %01010101          ; # # # #
+    .byte %01100110          ; ##  ##
+    .byte %01010101          ; # # # #
+    .byte %01110111          ; ### ###
+
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01000100          ; #   #
+    .byte %01000100          ; #   #
+    .byte %01110111          ; ### ###
+
+    .byte %01100110          ; ##  ##
+    .byte %01010101          ; # # # #
+    .byte %01010101          ; # # # #
+    .byte %01010101          ; # # # #
+    .byte %01100110          ; ##  ##
+
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01110111          ; ### ###
+
+    .byte %01110111          ; ### ###
+    .byte %01000100          ; #   #
+    .byte %01100110          ; ##  ##
+    .byte %01000100          ; #   #
+    .byte %01000100          ; #   #
+
 ;---Graphics Data from PlayerPal 2600---
-; BGCOLOR = $C8
 
 GM_DRESS_IDLE:
-        .byte #0
-        .byte #%01111110;$70
-        .byte #%01111110;$70
-        .byte #%00111100;$70
-        .byte #%01011010;$84
-        .byte #%01111110;$84
-        .byte #%00011000;$F4
-        .byte #%00111100;$00
-        .byte #%00011000;$00
+    .byte #0
+    .byte #%01111110;$70
+    .byte #%01111110;$70
+    .byte #%00111100;$70
+    .byte #%01011010;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
 GM_DRESS_WALK1:
-        .byte #0
-        .byte #%01111000;$70
-        .byte #%01111110;$70
-        .byte #%00111100;$70
-        .byte #%00011010;$84
-        .byte #%01111110;$84
-        .byte #%00011000;$F4
-        .byte #%00111100;$00
-        .byte #%00011000;$00
+    .byte #0
+    .byte #%01111000;$70
+    .byte #%01111110;$70
+    .byte #%00111100;$70
+    .byte #%00011010;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
 GM_DRESS_WALK2:
-        .byte #0
-        .byte #%00011110;$70
-        .byte #%01111110;$70
-        .byte #%00111100;$70
-        .byte #%01011000;$84
-        .byte #%01111110;$84
-        .byte #%00011000;$F4
-        .byte #%00111100;$00
-        .byte #%00011000;$00
+    .byte #0
+    .byte #%00011110;$70
+    .byte #%01111110;$70
+    .byte #%00111100;$70
+    .byte #%01011000;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
 GM_PANTS_IDLE:
-        .byte #0
-        .byte #%01100110;$70
-        .byte #%00100100;$70
-        .byte #%00111100;$70
-        .byte #%01011010;$84
-        .byte #%01111110;$84
-        .byte #%00011000;$F4
-        .byte #%00111100;$00
-        .byte #%00011000;$00
+    .byte #0
+    .byte #%01100110;$70
+    .byte #%00100100;$70
+    .byte #%00111100;$70
+    .byte #%01011010;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
 GM_PANTS_WALK1:
-        .byte #0
-        .byte #%01100000;$70
-        .byte #%00100110;$70
-        .byte #%00111100;$70
-        .byte #%00011010;$84
-        .byte #%01111110;$84
-        .byte #%00011000;$F4
-        .byte #%00111100;$00
-        .byte #%00011000;$00
+    .byte #0
+    .byte #%01100000;$70
+    .byte #%00100110;$70
+    .byte #%00111100;$70
+    .byte #%00011010;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
 GM_PANTS_WALK2:
-        .byte #0
-        .byte #%00000110;$70
-        .byte #%01100100;$70
-        .byte #%00111100;$70
-        .byte #%01011000;$84
-        .byte #%01111110;$84
-        .byte #%00011000;$F4
-        .byte #%00111100;$00
-        .byte #%00011000;$00
+    .byte #0
+    .byte #%00000110;$70
+    .byte #%01100100;$70
+    .byte #%00111100;$70
+    .byte #%01011000;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
 GM_BUG:
-        .byte #0
-        .byte #%00000000;$00
-        .byte #%00000000;$00
-        .byte #%01010010;$F0
-        .byte #%00111100;$F0
-        .byte #%00111100;$F2
-        .byte #%01010010;$F0
-        .byte #%00000000;$00
-        .byte #%00000000;$00      
+    .byte #0
+    .byte #%00000000;$00
+    .byte #%00000000;$00
+    .byte #%01010010;$F0
+    .byte #%00111100;$F0
+    .byte #%00111100;$F2
+    .byte #%01010010;$F0
+    .byte #%00000000;$00
+    .byte #%00000000;$00      
 GM_BIRD_1:
-        .byte #0
-        .byte #%00000000;$1C
-        .byte #%00000001;$1C
-        .byte #%00111111;$0E
-        .byte #%11111110;$0A
-        .byte #%00011000;$0E
-        .byte #%01110110;$0E
-        .byte #%00000000;$0E
-        .byte #%00000000;$0E
+    .byte #0
+    .byte #%00000000;$1C
+    .byte #%00000001;$1C
+    .byte #%00111111;$0E
+    .byte #%11111110;$0A
+    .byte #%00011000;$0E
+    .byte #%01110110;$0E
+    .byte #%00000000;$0E
+    .byte #%00000000;$0E
 GM_BIRD_2:
-        .byte #0
-        .byte #%00000000;$1C
-        .byte #%00000001;$1C
-        .byte #%00111111;$0E
-        .byte #%11111110;$0A
-        .byte #%11111000;$0E
-        .byte #%00000000;$0E
-        .byte #%00000000;$0E
-        .byte #%00000000;$0E
+    .byte #0
+    .byte #%00000000;$1C
+    .byte #%00000001;$1C
+    .byte #%00111111;$0E
+    .byte #%11111110;$0A
+    .byte #%11111000;$0E
+    .byte #%00000000;$0E
+    .byte #%00000000;$0E
+    .byte #%00000000;$0E
 
 ;---End Graphics Data---
 
 
 ;---Color Data from PlayerPal 2600---
 GM_PLAYER_COLOR_IDLE:
-        .byte #0
-        .byte #$70;
-        .byte #$70;
-        .byte #$70;
-        .byte #$84;
-        .byte #$84;
-        .byte #$F4;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$70;
+    .byte #$70;
+    .byte #$70;
+    .byte #$84;
+    .byte #$84;
+    .byte #$F4;
+    .byte #$00;
+    .byte #$00;
 GM_PLAYER_COLOR_WALK1:
-        .byte #0
-        .byte #$70;
-        .byte #$70;
-        .byte #$70;
-        .byte #$84;
-        .byte #$84;
-        .byte #$F4;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$70;
+    .byte #$70;
+    .byte #$70;
+    .byte #$84;
+    .byte #$84;
+    .byte #$F4;
+    .byte #$00;
+    .byte #$00;
 GM_PLAYER_COLOR_WALK2:
-        .byte #0
-        .byte #$70;
-        .byte #$70;
-        .byte #$70;
-        .byte #$84;
-        .byte #$84;
-        .byte #$F4;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$70;
+    .byte #$70;
+    .byte #$70;
+    .byte #$84;
+    .byte #$84;
+    .byte #$F4;
+    .byte #$00;
+    .byte #$00;
 GM_PLAYER_BW_IDLE:
-        .byte #0
-        .byte #$0;
-        .byte #$0;
-        .byte #$0;
-        .byte #$02;
-        .byte #$02;
-        .byte #$04;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$0;
+    .byte #$0;
+    .byte #$0;
+    .byte #$02;
+    .byte #$02;
+    .byte #$04;
+    .byte #$00;
+    .byte #$00;
 GM_PLAYER_BW_WALK1:
-        .byte #0
-        .byte #$0;
-        .byte #$0;
-        .byte #$0;
-        .byte #$02;
-        .byte #$02;
-        .byte #$04;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$0;
+    .byte #$0;
+    .byte #$0;
+    .byte #$02;
+    .byte #$02;
+    .byte #$04;
+    .byte #$00;
+    .byte #$00;
 GM_PLAYER_BW_WALK2:
-        .byte #0
-        .byte #$0;
-        .byte #$0;
-        .byte #$0;
-        .byte #$02;
-        .byte #$02;
-        .byte #$04;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$0;
+    .byte #$0;
+    .byte #$0;
+    .byte #$02;
+    .byte #$02;
+    .byte #$04;
+    .byte #$00;
+    .byte #$00;
 GM_BUG_COLOR:
-        .byte #0
-        .byte #$00;
-        .byte #$00;
-        .byte #$F0;
-        .byte #$F0;
-        .byte #$F2;
-        .byte #$F0;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$00;
+    .byte #$00;
+    .byte #$F0;
+    .byte #$F0;
+    .byte #$F2;
+    .byte #$F0;
+    .byte #$00;
+    .byte #$00;
 GM_BUG_BW:
-        .byte #0
-        .byte #$00;
-        .byte #$00;
-        .byte #$00;
-        .byte #$00;
-        .byte #$02;
-        .byte #$00;
-        .byte #$00;
-        .byte #$00;
+    .byte #0
+    .byte #$00;
+    .byte #$00;
+    .byte #$00;
+    .byte #$00;
+    .byte #$02;
+    .byte #$00;
+    .byte #$00;
+    .byte #$00;
 GM_BIRD_COLOR:
-        .byte #0
-        .byte #$1C;
-        .byte #$1C;
-        .byte #$0E;
-        .byte #$0A;
-        .byte #$0E;
-        .byte #$0E;
-        .byte #$0E;
-        .byte #$0E;
+    .byte #0
+    .byte #$1C;
+    .byte #$1C;
+    .byte #$0E;
+    .byte #$0A;
+    .byte #$0E;
+    .byte #$0E;
+    .byte #$0E;
+    .byte #$0E;
 GM_BIRD_BW:
-        .byte #0
-        .byte #$0C;
-        .byte #$0C;
-        .byte #$0E;
-        .byte #$0A;
-        .byte #$0E;
-        .byte #$0E;
-        .byte #$0E;
-        .byte #$0E;
+    .byte #0
+    .byte #$0C;
+    .byte #$0C;
+    .byte #$0E;
+    .byte #$0A;
+    .byte #$0E;
+    .byte #$0E;
+    .byte #$0E;
+    .byte #$0E;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Fill the 4K ROM
