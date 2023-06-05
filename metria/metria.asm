@@ -16,31 +16,6 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; SetObjectXPos
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; A : Contains the the desired x-coordinate
-;; Y=0 : Player0
-;; Y=1 : Player1
-;; Y=2 : Missile0
-;; Y=3 : Missile1
-;; Y=4 : Ball
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    MAC SetObjectXPos
-        sec                     ; Set carry flag
-        sta WSYNC               ; Get fresh scanline
-.Div15Loop                      ; Divide A with 15 by subtraction in loop
-        sbc #15                 ; Subtract 15 from A
-        bcs .Div15Loop          ; Loop if carry flag is set
-        eor #7                  ; Adjust the remainder in A between -8 and 7
-        REPEAT 4                ; Repeat 4 times
-            asl                 ; Shift bits left by one
-        REPEND                  ; End of repeat
-        sta HMP0,Y              ; Set fine position value for object HMP0+Y
-        sta RESP0,Y             ; Seset rough position for object HMP0+Y
-    ENDM
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Contants
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -58,6 +33,9 @@ LOGO_FADE_DELAY = 20            ; delay for each fade step - 20 frames/step
 
 GAME_BK_COLOR = $C8
 GAME_BK_BW = $08
+GAME_PF_COLOR = $C0
+GAME_PF_BW = $02
+
 GAME_PLAYER_HEIGHT = 9
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -124,7 +102,7 @@ Reset:
     sta VBLANK                  ; turn on VBLANK 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; LOGO MODE
+;; LOGO MODE - LM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 LM_NextFrame:
     VERTICAL_SYNC               ; vertical sync - 3 scanlines
@@ -248,66 +226,57 @@ LM_NextFrame:
     jmp LM_NextFrame
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; MODE: GAME - Start new frame
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; GAME MODE - GM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GM_NextFrame:
-    lda #2                  ; A = 2 = #%00000010
-    sta VBLANK              ; Turn on VBLANK
-    VERTICAL_SYNC           ; Vertical sync - 3 scanlines
+    VERTICAL_SYNC               ; Vertical sync - 3 scanlines
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Vertical blank - 37 scanlines total
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Vertical Blank - 37 scanlines - 2812 mc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda #TIMER_VBLANK
+    sta TIM64T                  ; set timer to 43x64 = 2752 mc
 
-    lda GM_PlayerXPos
-    ldy #0
-    SetObjectXPos
+    lda GM_PlayerXPos           ; load player x pos
+    ldy #0                      ; set Y = 0 for player 0
+    jsr SetObjectXPos           ; call subroutine to set object x pos 
 
-    lda GM_BugXPos
-    ldy #1
-    SetObjectXPos
+    lda GM_BugXPos              ; load bug x pos
+    ldy #1                      ; set Y = 1 for player 1
+    jsr SetObjectXPos           ; call subroutine to set object x pos
 
-    sta WSYNC               ; Wait for next scanline
-    sta HMOVE               ; Apply the fine position offset
+    sta WSYNC                   ; geta fresh scanline 
+    sta HMOVE                   ; apply positions offset
 
-    lda #1
-    sta CTRLPF
-
-    lda #0
-    sta GM_PlayfieldIdx
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Wait for the remining scanlines - Total 37
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.GM_VBLankWait:
-    ldx #33             ; X = 37-3
-    WAIT_X_WSYNC        ; Wait for X scanlines
-
-    lda #0              ; A = 0 = #%00000000
-    sta VBLANK          ; Turn off VBLANK
-
-    lda #%00001000
-    bit SWCHB
-    beq .GM_BW
-.GM_Color:
+.GM_SetColor:                   ; set correct colors
+    lda SWCHB
+    and BW_MASK
+    beq .GM_BWMode
+.GM_ColorMode:
     lda #GAME_BK_COLOR        
     sta COLUBK
-    lda #$C0
+    lda #GAME_PF_COLOR
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
-    jmp .GM_ColorDone
-.GM_BW:
+    jmp .GM_SetColorDone
+.GM_BWMode:
     lda #GAME_BK_BW
     sta COLUBK
-    lda #$02
+    lda #GAME_PF_BW
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_BW
-.GM_ColorDone:
-    sta WSYNC
+.GM_SetColorDone
 
+.GM_VBLankWait:
+    ldx INTIM
+    bne .GM_VBLankWait          ; wait until timer is done
+    lda #0
+    sta WSYNC                   ; get a fresh scanline
+    sta VBLANK                  ; turn off VBLANK
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Draw screen - 192 scanlines - 2 line kernel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -362,7 +331,7 @@ GM_NextFrame:
 .GM_OverScanWait:
     lda #2              ; A = 2 = #%00000010
     sta VBLANK          ; Turn on VBLANK
-    ldx #28             ; X = 30-2
+    ldx #27             ; X = 30-2
     WAIT_X_WSYNC        ; Wait for X scanlines
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -444,6 +413,31 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subruotines
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SetObjectXPos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; A : Contains the the desired x-coordinate
+;; Y=0 : Player0
+;; Y=1 : Player1
+;; Y=2 : Missile0
+;; Y=3 : Missile1
+;; Y=4 : Ball
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+SetObjectXPos subroutine
+        sec                     ; Set carry flag
+        sta WSYNC               ; Get fresh scanline
+.Div15Loop                      ; Divide A with 15 by subtraction in loop
+        sbc #15                 ; Subtract 15 from A
+        bcs .Div15Loop          ; Loop if carry flag is set
+        eor #7                  ; Adjust the remainder in A between -8 and 7
+        REPEAT 4                ; Repeat 4 times
+            asl                 ; Shift bits left by one
+        REPEND                  ; End of repeat
+        sta HMP0,Y              ; Set fine position value for object HMP0+Y
+        sta RESP0,Y             ; Seset rough position for object HMP0+Y
+        rts
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
