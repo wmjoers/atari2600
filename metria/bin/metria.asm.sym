@@ -1,85 +1,85 @@
 --- Symbol List (sorted by symbol)
 0.FREE_BYTES             0000                  
-0.GM_BWMode              f152              (R )
-0.GM_CheckCollisions     f194                  
-0.GM_CheckCollisionsDone f19d              (R )
-0.GM_CheckInputDone      f25f              (R )
-0.GM_CheckInputDown      f23c              (R )
-0.GM_CheckInputLeft      f245              (R )
-0.GM_CheckInputRight     f252              (R )
-0.GM_CheckInputUp        f233                  
-0.GM_CheckReset          f229                  
-0.GM_ColorMode           f12b                  
-0.GM_DrawBird            f1c8                  
-0.GM_DrawBirdDone        f1dd                  
-0.GM_DrawBug             f201                  
-0.GM_DrawBugDone         f21a                  
-0.GM_DrawPlayer          f1ee                  
-0.GM_DrawPlayerDone      f201                  
-0.GM_NoReset             f233              (R )
-0.GM_OverscanWait        f25f              (R )
-0.GM_PlayfieldInit       f19f                  
-0.GM_PlayfieldLoop       f1ee              (R )
-0.GM_ScoreBoardWait      f1b3              (R )
-0.GM_SetColor            f124                  
-0.GM_SetColorDone        f176              (R )
-0.GM_SetDress            f18c              (R )
-0.GM_SetGraphics         f17a                  
-0.GM_SetGraphicsDone     f194              (R )
-0.GM_SetPants            f181                  
-0.GM_SkyLoop             f1c8              (R )
-0.GM_VBLankWait          f1a3              (R )
-0.GM_WriteBird           f1d2              (R )
-0.GM_WriteBug            f20c              (R )
-0.GM_WritePlayer         f1f9              (R )
-0.LM_Bottom              f0d5                  
-0.LM_BWMode              f080              (R )
-0.LM_CheckLeftButton     f0ef                  
-0.LM_CheckReset          f0e5                  
-0.LM_ColorMode           f074                  
-0.LM_Fade                f05b                  
-0.LM_FadeDone            f06b              (R )
-0.LM_LoopX               f09f              (R )
-0.LM_LoopY               f09d              (R )
-0.LM_Middle              f09b                  
-0.LM_NoLeftButton        f0fa              (R )
-0.LM_NoReset             f0ef              (R )
-0.LM_OverscanWait        f0fa              (R )
-0.LM_SetColor            f06b                  
-0.LM_SetColorDone        f089              (R )
-0.LM_Top                 f094                  
-0.LM_TurnOffLogo         f0cb                  
-0.LM_VBLankWait          f089              (R )
+0.GM_BWMode              f154              (R )
+0.GM_CheckCollisions     f196                  
+0.GM_CheckCollisionsDone f19f              (R )
+0.GM_CheckInputDone      f263              (R )
+0.GM_CheckInputDown      f240              (R )
+0.GM_CheckInputLeft      f249              (R )
+0.GM_CheckInputRight     f256              (R )
+0.GM_CheckInputUp        f237                  
+0.GM_CheckReset          f22d                  
+0.GM_ColorMode           f12d                  
+0.GM_DrawBird            f1ca                  
+0.GM_DrawBirdDone        f1df                  
+0.GM_DrawBug             f203                  
+0.GM_DrawBugDone         f21c                  
+0.GM_DrawPlayer          f1f0                  
+0.GM_DrawPlayerDone      f203                  
+0.GM_NoReset             f237              (R )
+0.GM_OverscanWait        f263              (R )
+0.GM_PlayfieldInit       f1a1                  
+0.GM_PlayfieldLoop       f1f0              (R )
+0.GM_ScoreBoardWait      f1b5              (R )
+0.GM_SetColor            f126                  
+0.GM_SetColorDone        f178              (R )
+0.GM_SetDress            f18e              (R )
+0.GM_SetGraphics         f17c                  
+0.GM_SetGraphicsDone     f196              (R )
+0.GM_SetPants            f183                  
+0.GM_SkyLoop             f1ca              (R )
+0.GM_VBLankWait          f1a5              (R )
+0.GM_WriteBird           f1d4              (R )
+0.GM_WriteBug            f20e              (R )
+0.GM_WritePlayer         f1fb              (R )
+0.LM_Bottom              f0d4                  
+0.LM_BWMode              f07d              (R )
+0.LM_CheckLeftButton     f0ee                  
+0.LM_CheckReset          f0e4                  
+0.LM_ColorMode           f071                  
+0.LM_Fade                f058                  
+0.LM_FadeDone            f068              (R )
+0.LM_LoopX               f09e              (R )
+0.LM_LoopY               f09c              (R )
+0.LM_Middle              f09a                  
+0.LM_NoLeftButton        f0fc              (R )
+0.LM_NoReset             f0ee              (R )
+0.LM_OverscanWait        f0fc              (R )
+0.LM_SetColor            f068                  
+0.LM_SetColorDone        f086              (R )
+0.LM_Top                 f093                  
+0.LM_TurnOffLogo         f0ca                  
+0.LM_VBLankWait          f088              (R )
 1.CLEAR_STACK            f005              (R )
-10.ADDRESS               f381              (R )
+10.ADDRESS               f385              (R )
 10.POINTER               0086              (R )
-11.ADDRESS               f3b7              (R )
+11.ADDRESS               f3bb              (R )
 11.POINTER               0090              (R )
-12.ADDRESS               f3c9              (R )
+12.ADDRESS               f3cd              (R )
 12.POINTER               008c              (R )
-13.ADDRESS               f39c              (R )
+13.ADDRESS               f3a0              (R )
 13.POINTER               0086              (R )
-14.ADDRESS               f3c0              (R )
+14.ADDRESS               f3c4              (R )
 14.POINTER               0090              (R )
-15.ADDRESS               f3d2              (R )
+15.ADDRESS               f3d6              (R )
 15.POINTER               008c              (R )
-16.ADDRESS               f34b              (R )
+16.ADDRESS               f34f              (R )
 16.POINTER               0084              (R )
-17.ADDRESS               f330              (R )
+17.ADDRESS               f334              (R )
 17.POINTER               0084              (R )
-2.ADDRESS                f330              (R )
+2.ADDRESS                f334              (R )
 2.POINTER                0084              (R )
-20.Div15Loop             f28f              (R )
-3.ADDRESS                f381              (R )
+20.Div15Loop             f293              (R )
+3.ADDRESS                f385              (R )
 3.POINTER                0086              (R )
-4.ADDRESS                f3b7              (R )
+4.ADDRESS                f3bb              (R )
 4.POINTER                0090              (R )
-5.ADDRESS                f36f              (R )
+5.ADDRESS                f373              (R )
 5.POINTER                008a              (R )
-6.VSLP1                  f04f              (R )
-7.WaitX                  f096              (R )
-8.WaitX                  f0d7              (R )
-9.VSLP1                  f106              (R )
+6.VSLP1                  f04c              (R )
+7.WaitX                  f095              (R )
+8.WaitX                  f0d6              (R )
+9.VSLP1                  f108              (R )
 AUDC0                    0015                  
 AUDC1                    0016                  
 AUDF0                    0017                  
@@ -101,7 +101,7 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007              (R )
-Digits                   f2e0                  
+Digits                   f2e4                  
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
@@ -115,33 +115,33 @@ GAME_SCOREBOARD_COLOR    0000              (R )
 GAME_SKY_BW              0006              (R )
 GAME_SKY_COLOR           0078              (R )
 GM_BackgroundColor       0082              (R )
-GM_BIRD_1                f36f              (R )
-GM_BIRD_2                f378                  
-GM_BIRD_BW               f3d2              (R )
-GM_BIRD_COLOR            f3c9              (R )
+GM_BIRD_1                f373              (R )
+GM_BIRD_2                f37c                  
+GM_BIRD_BW               f3d6              (R )
+GM_BIRD_COLOR            f3cd              (R )
 GM_BirdColorPtr          008c              (R )
 GM_BirdPtr               008a              (R )
 GM_BirdReflection        008f              (R )
 GM_BirdYPos              008e              (R )
-GM_BUG                   f366              (R )
-GM_BUG_BW                f3c0              (R )
-GM_BUG_COLOR             f3b7              (R )
+GM_BUG                   f36a              (R )
+GM_BUG_BW                f3c4              (R )
+GM_BUG_COLOR             f3bb              (R )
 GM_BugColorPtr           0090              (R )
 GM_BugXPos               0092              (R )
 GM_BugYPos               0093              (R )
-GM_DRESS_IDLE            f330              (R )
-GM_DRESS_WALK1           f339                  
-GM_DRESS_WALK2           f342                  
-GM_NextFrame             f104              (R )
-GM_PANTS_IDLE            f34b              (R )
-GM_PANTS_WALK1           f354                  
-GM_PANTS_WALK2           f35d                  
-GM_PLAYER_BW_IDLE        f39c              (R )
-GM_PLAYER_BW_WALK1       f3a5                  
-GM_PLAYER_BW_WALK2       f3ae                  
-GM_PLAYER_COLOR_IDLE     f381              (R )
-GM_PLAYER_COLOR_WALK1    f38a                  
-GM_PLAYER_COLOR_WALK2    f393                  
+GM_DRESS_IDLE            f334              (R )
+GM_DRESS_WALK1           f33d                  
+GM_DRESS_WALK2           f346                  
+GM_NextFrame             f106              (R )
+GM_PANTS_IDLE            f34f              (R )
+GM_PANTS_WALK1           f358                  
+GM_PANTS_WALK2           f361                  
+GM_PLAYER_BW_IDLE        f3a0              (R )
+GM_PLAYER_BW_WALK1       f3a9                  
+GM_PLAYER_BW_WALK2       f3b2                  
+GM_PLAYER_COLOR_IDLE     f385              (R )
+GM_PLAYER_COLOR_WALK1    f38e                  
+GM_PLAYER_COLOR_WALK2    f397                  
 GM_PlayerColorPtr        0086              (R )
 GM_PlayerPtr             0084              (R )
 GM_PlayerXPos            0088              (R )
@@ -165,14 +165,14 @@ INPT4                    000c              (R )
 INPT5                    000d                  
 INTIM                    0284              (R )
 LEFT_BTN_MASK            0080              (R )
-LM_LogoFade_BW           f2db              (R )
-LM_LogoFade_Color        f2d6              (R )
+LM_LogoFade_BW           f2df              (R )
+LM_LogoFade_Color        f2da              (R )
 LM_LogoFadeDelay         0081              (R )
 LM_LogoFadeState         0080              (R )
-LM_LogoPF0               f2a0              (R )
-LM_LogoPF1               f2b2              (R )
-LM_LogoPF2               f2c4              (R )
-LM_NextFrame             f04d              (R )
+LM_LogoPF0               f2a4              (R )
+LM_LogoPF1               f2b6              (R )
+LM_LogoPF2               f2c8              (R )
+LM_NextFrame             f04a              (R )
 LOGO_BK_BW               0006              (R )
 LOGO_BK_COLOR            0038              (R )
 LOGO_FADE_DELAY          0014              (R )
@@ -185,10 +185,10 @@ PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
 PFCounter                0095              (R )
-PlaceBug                 f269              (R )
+PlaceBug                 f26d              (R )
 Random                   0096              (R )
 RANDOM_SEED              0072              (R )
-Randomize                f27c              (R )
+Randomize                f280              (R )
 REFP0                    000b              (R )
 REFP1                    000c                  
 RESBL                    0014                  
@@ -201,7 +201,7 @@ RESMP1                   0029
 RESP0                    0010              (R )
 RESP1                    0011                  
 RSYNC                    0003                  
-SetObjectXPos            f28c              (R )
+SetObjectXPos            f290              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280              (R )

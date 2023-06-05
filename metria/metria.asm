@@ -109,8 +109,6 @@ Reset:
     lda #21
     sta GM_PlayerYPos
 
-    jsr PlaceBug
-
     lda #4
     sta GM_BirdYPos
     lda #0
@@ -159,6 +157,8 @@ LM_NextFrame:
     lda LM_LogoFade_BW,Y
     sta COLUPF                  ; set logo color
 .LM_SetColorDone
+
+    inc Random
 
 .LM_VBLankWait:
     ldx INTIM
@@ -240,6 +240,7 @@ LM_NextFrame:
     and #LEFT_BTN_MASK
     bne .LM_NoLeftButton
     sta WSYNC
+    jsr PlaceBug
     jmp GM_NextFrame            ; start game if button is pressed
 .LM_NoLeftButton:
 
@@ -339,7 +340,7 @@ GM_NextFrame:
 ;; Score Board - 20 scanlines - 1520 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda #23
-    sta TIM64T                  ; set timer to 35x64 = 2240 mc
+    sta TIM64T                  ; set timer to 23x64 = 1472 mc
 
 .GM_ScoreBoardWait:
     ldx INTIM
@@ -427,11 +428,11 @@ GM_NextFrame:
     lda (GM_BugColorPtr),Y      ; load player color from lookup table
     sta COLUP1                  ; set color for player 1 slice
 .GM_DrawBugDone:
-
-    sta WSYNC                   ; wait for end of second scanline
+    sta WSYNC
     ; -------------------------  
     dec PFCounter
     bne .GM_PlayfieldLoop       ; repeat next scanline until finished
+    sta WSYNC
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Overscan - 30 scanlines - 2280 mc
