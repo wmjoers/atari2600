@@ -34,6 +34,8 @@ GAME_BK_COLOR = $C8             ; game background color - color mode
 GAME_BK_BW = $08                ; game background color - black & white
 GAME_PF_COLOR = $C0             ; game playfield color - color mode
 GAME_PF_BW = $02                ; game playfield color - black & white
+GAME_SKY_COLOR = $78            ; game sky color - color mode
+GAME_SKY_BW = $06               ; game sky color - black & white
 
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
@@ -47,6 +49,9 @@ GAME_BUG_HEIGHT = 9             ; bug sprite height
 
 LM_LogoFadeState    ds 1        ; current logo fade state
 LM_LogoFadeDelay    ds 1        ; current logo fade delay
+
+GM_BackgroundColor  ds 1
+GM_SkyColor         ds 1
 
 GM_PlayerPtr        ds 2
 GM_PlayerColorPtr   ds 2
@@ -258,16 +263,20 @@ GM_NextFrame:
     and BW_MASK
     beq .GM_BWMode
 .GM_ColorMode:
+    lda #GAME_SKY_COLOR
+    sta GM_SkyColor
     lda #GAME_BK_COLOR        
-    sta COLUBK
+    sta GM_BackgroundColor
     lda #GAME_PF_COLOR
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
     jmp .GM_SetColorDone
 .GM_BWMode:
+    lda #GAME_SKY_BW
+    sta GM_SkyColor
     lda #GAME_BK_BW
-    sta COLUBK
+    sta GM_BackgroundColor
     lda #GAME_PF_BW
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
@@ -285,7 +294,7 @@ GM_NextFrame:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
 .GM_SetGraphicsDone:
 
-    lda #96
+    lda #76
     sta PFCounter   
 
     lda #1
@@ -298,9 +307,30 @@ GM_NextFrame:
     sta WSYNC                   ; get a fresh scanline
     ; -------------------------
     sta VBLANK                  ; turn off VBLANK
- 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Playfield - 192 scanlines - 14592 mc
+;; Score Board - 20 scanlines - 1520 mc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda #0
+    sta COLUBK
+    
+    ldx #20
+    WAIT_X_WSYNC
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sky - 20 scanlines - 1520 mc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda GM_SkyColor
+    sta COLUBK
+    
+    ldx #20
+    WAIT_X_WSYNC
+
+    lda GM_BackgroundColor
+    sta COLUBK
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Playfield - 152 scanlines - 11552 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .GM_PlayfieldLoop:
