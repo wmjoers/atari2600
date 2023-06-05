@@ -63,6 +63,7 @@ GM_PlayerXPos       ds 1
 GM_PlayerYPos       ds 1
 
 GM_BirdPtr          ds 2
+GM_BirdColorPtr     ds 2
 GM_BirdYPos         ds 1
 GM_BirdReflection   ds 1
 
@@ -287,6 +288,7 @@ GM_NextFrame:
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
+    SET_POINTER GM_BirdColorPtr, GM_BIRD_COLOR
     jmp .GM_SetColorDone
 .GM_BWMode:
     lda #GAME_SKY_BW
@@ -297,6 +299,7 @@ GM_NextFrame:
     sta COLUPF
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_BW
+    SET_POINTER GM_BirdColorPtr, GM_BIRD_BW
 .GM_SetColorDone:
     lda #GAME_SCOREBOARD_COLOR
     sta COLUBK
@@ -314,7 +317,7 @@ GM_NextFrame:
 
 .GM_CheckCollisions:
     lda CXPPMM
-    and #%11110000
+    and #%10000000
     beq .GM_CheckCollisionsDone
     jsr PlaceBug
 .GM_CheckCollisionsDone:
@@ -371,7 +374,7 @@ GM_NextFrame:
     sta WSYNC                   ; wait for next scanline
     ; ------------------------- 
     sta GRP0                    ; set graphics for player 0 slice
-    lda GM_BIRD_COLOR,Y         ; load player color from lookup table
+    lda (GM_BirdColorPtr),Y     ; load player color from lookup table
     sta COLUP0                  ; set color for player 1 slice
 .GM_DrawBirdDone:
     sta WSYNC                   ; wait for next scanline
