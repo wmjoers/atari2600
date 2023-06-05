@@ -36,6 +36,7 @@ GAME_PF_COLOR = $C0             ; game playfield color - color mode
 GAME_PF_BW = $02                ; game playfield color - black & white
 GAME_SKY_COLOR = $78            ; game sky color - color mode
 GAME_SKY_BW = $06               ; game sky color - black & white
+GAME_SCOREBOARD_COLOR = $0      ; game score board color - all modes
 
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
@@ -282,6 +283,8 @@ GM_NextFrame:
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_BW
 .GM_SetColorDone:
+    lda #GAME_SCOREBOARD_COLOR
+    sta COLUBK
 
 .GM_SetGraphics
     lda SWCHB
@@ -294,11 +297,11 @@ GM_NextFrame:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
 .GM_SetGraphicsDone:
 
-    lda #76
-    sta PFCounter   
-
+.GM_PlayfieldInit
     lda #1
-    sta VDELP0
+    sta VDELP0                  ; set vertical delay för player 0
+    lda #76                     
+    sta PFCounter               ; 152/2 scanelines
 
 .GM_VBLankWait:
     ldx INTIM
@@ -311,11 +314,14 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Score Board - 20 scanlines - 1520 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    lda #0
-    sta COLUBK
-    
-    ldx #20
-    WAIT_X_WSYNC
+    lda #23
+    sta TIM64T                  ; set timer to 35x64 = 2240 mc
+
+.GM_ScoreBoardWait:
+    ldx INTIM
+    bne .GM_ScoreBoardWait      ; wait until timer is done
+    sta WSYNC                   ; get a fresh scanline
+    ; -------------------------
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sky - 20 scanlines - 1520 mc
@@ -323,15 +329,20 @@ GM_NextFrame:
     lda GM_SkyColor
     sta COLUBK
     
-    ldx #20
-    WAIT_X_WSYNC
+    lda #23
+    sta TIM64T                  ; set timer to 35x64 = 2240 mc
 
-    lda GM_BackgroundColor
-    sta COLUBK
+.GM_SkyWait:
+    ldx INTIM
+    bne .GM_SkyWait             ; wait until timer is done
+    sta WSYNC                   ; get a fresh scanline
+    ; -------------------------
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Playfield - 152 scanlines - 11552 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda GM_BackgroundColor
+    sta COLUBK
 
 .GM_PlayfieldLoop:
 
@@ -549,6 +560,27 @@ GM_BUG:
         .byte #%01010010;$F0
         .byte #%00000000;$00
         .byte #%00000000;$00      
+GM_BIRD_1:
+        .byte #0
+        .byte #%00000000;$1C
+        .byte #%00000001;$1C
+        .byte #%00111111;$0E
+        .byte #%11111110;$0A
+        .byte #%00011000;$0E
+        .byte #%01110110;$0E
+        .byte #%00000000;$0E
+        .byte #%00000000;$0E
+GM_BIRD_2:
+        .byte #0
+        .byte #%00000000;$1C
+        .byte #%00000001;$1C
+        .byte #%00111111;$0E
+        .byte #%11111110;$0A
+        .byte #%11111000;$0E
+        .byte #%00000000;$0E
+        .byte #%00000000;$0E
+        .byte #%00000000;$0E
+
 ;---End Graphics Data---
 
 
@@ -633,6 +665,26 @@ GM_BUG_BW:
         .byte #$00;
         .byte #$00;
         .byte #$00;
+GM_BIRD_COLOR:
+        .byte #0
+        .byte #$1C;
+        .byte #$1C;
+        .byte #$0E;
+        .byte #$0A;
+        .byte #$0E;
+        .byte #$0E;
+        .byte #$0E;
+        .byte #$0E;
+GM_BIRD_BW:
+        .byte #0
+        .byte #$0C;
+        .byte #$0C;
+        .byte #$0E;
+        .byte #$0A;
+        .byte #$0E;
+        .byte #$0E;
+        .byte #$0E;
+        .byte #$0E;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Fill the 4K ROM
