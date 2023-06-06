@@ -25,6 +25,8 @@
         sta GM_MissileYPos
         lda #2
         sta GM_MissileActive
+        ldy #sfxCOLLIDE
+        jsr SFX_TRIGGER
 .NoMissile
     ENDM
 
@@ -126,6 +128,9 @@ Temp                ds 1
 ScoreSprite         ds 6
 TimerSprite         ds 6
 
+SFX_LEFT            ds 1   
+SFX_RIGHT           ds 1    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program start - Located at top of ROM at address $F000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -200,6 +205,11 @@ LM_NextFrame:
     dec LM_LogoFadeState        ; dec fade in state 
     lda #LOGO_FADE_DELAY    
     sta LM_LogoFadeDelay        ; restore fade in delay
+
+    lda LM_LogoFadeState
+    bne .LM_FadeDone
+    ldy #sfxPING   
+    jsr SFX_TRIGGER
 .LM_FadeDone:
 
 .LM_SetColor:                   ; set correct colors
@@ -219,7 +229,7 @@ LM_NextFrame:
     lda LM_LogoFade_BW,Y
     sta COLUPF                  ; set logo color
 .LM_SetColorDone
-
+    
     inc Random
 
 .LM_VBLankWait:
@@ -306,6 +316,8 @@ LM_NextFrame:
     jmp GM_NextFrame            ; start game if button is pressed
 .LM_NoLeftButton:
 
+    jsr SFX_UPDATE              ; update sound effects
+
 .LM_OverscanWait:
     ldx INTIM
     bne .LM_OverscanWait        ; wait until timer is done
@@ -338,6 +350,8 @@ GM_NextFrame:
     adc #1
     sta Score
     cld
+    ldy #sfxCOLLECT
+    jsr SFX_TRIGGER
     jsr PlaceBug
 .GM_CheckColP0ToP1Done:
 
@@ -349,6 +363,8 @@ GM_NextFrame:
     sta Score
     lda #0
     sta GM_MissileActive
+    ldy #sfxGAMEOVER  
+    jsr SFX_TRIGGER
 .GM_CheckColM1ToP0Done:
 
 
@@ -678,6 +694,8 @@ GM_NextFrame:
     jmp Reset                   ; jump to reset if reset button has been pressed
 .GM_NoReset:
 
+    jsr SFX_UPDATE
+
     lda GameOver
     beq .GM_NotGameOver
     lda Timer
@@ -943,6 +961,9 @@ PrepareScoreAndTimer subroutine
     bne .SpriteLoop
 
     rts
+
+    include sfx.asm
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup tabes
