@@ -51,7 +51,7 @@ LOGO_FADE_DELAY = 20            ; delay for each fade step - 20 frames/step
 GAME_BK_COLOR = $C8             ; game background color - color mode
 GAME_BK_BW = $08                ; game background color - black & white
 GAME_PF_COLOR = $C0             ; game playfield color - color mode
-GAME_PF_BW = $02                ; game playfield color - black & white
+GAME_PF_BW = $04                ; game playfield color - black & white
 GAME_SKY_COLOR = $78            ; game sky color - color mode
 GAME_SKY_BW = $04               ; game sky color - black & white
 

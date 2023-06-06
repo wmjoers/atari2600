@@ -426,7 +426,7 @@
      51  0000 ????	       00 c8	   GAME_BK_COLOR =	$C8	; game background color - color mode
      52  0000 ????	       00 08	   GAME_BK_BW =	$08	; game background color - black & white
      53  0000 ????	       00 c0	   GAME_PF_COLOR =	$C0	; game playfield color - color mode
-     54  0000 ????	       00 02	   GAME_PF_BW =	$02	; game playfield color - black & white
+     54  0000 ????	       00 04	   GAME_PF_BW =	$04	; game playfield color - black & white
      55  0000 ????	       00 78	   GAME_SKY_COLOR =	$78	; game sky color - color mode
      56  0000 ????	       00 04	   GAME_SKY_BW =	$04	; game sky color - black & white
      57  0000 ????
@@ -918,7 +918,7 @@
     454  f1e2		       85 84		      sta	GM_SkyColor
     455  f1e4		       a9 08		      lda	#GAME_BK_BW
     456  f1e6		       85 82		      sta	GM_BackgroundColor
-    457  f1e8		       a9 02		      lda	#GAME_PF_BW
+    457  f1e8		       a9 04		      lda	#GAME_PF_BW
     458  f1ea		       85 83		      sta	GM_TreeColor
       0  f1ec					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
       1  f1ec				   .POINTER   SET	GM_PlayerColorPtr

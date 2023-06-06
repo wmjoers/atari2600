@@ -171,7 +171,7 @@ GAME_DIGIT_HEIGHT        0005
 GAME_GAMEOVER_BW         0002              (R )
 GAME_GAMEOVER_COLOR      0020              (R )
 GAME_MAX_TIME            0060              (R )
-GAME_PF_BW               0002              (R )
+GAME_PF_BW               0004              (R )
 GAME_PF_COLOR            00c0              (R )
 GAME_PLAYER_ANIM_SPEED   000a              (R )
 GAME_PLAYER_HEIGHT       0009              (R )
