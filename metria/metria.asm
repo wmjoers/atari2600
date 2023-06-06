@@ -60,6 +60,11 @@ GAME_GAMEOVER_BW = $02          ; game over color - black & white
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
 
+GAME_PLAYER_MIN_X = 0           ; player minimun x
+GAME_PLAYER_MAX_X = 146           ; player minimun x
+GAME_PLAYER_MIN_Y = 2           ; player minimun x
+GAME_PLAYER_MAX_Y = 62           ; player minimun x
+
 GAME_BIRD_HEIGHT = 6            ; bird sprite height
 GAME_BIRD_TICK_LEN = 10         ; bird anim speed
 GAME_BIRD_YPOS_TBL_LEN = 12      ; bird anim table length
@@ -316,7 +321,6 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda #TIMER_VBLANK
     sta TIM64T                  ; set timer to 43x64 = 2752 mc
-
 
 .GM_CheckCollisions:
 
@@ -669,6 +673,15 @@ GM_NextFrame:
     sta GM_BirdYPosIdx
 .GM_BirdAnimSet:
     tay 
+
+    and #1
+    beq .GM_BirdFlap
+    SET_POINTER GM_BirdPtr, GM_BIRD_2
+    jmp .GM_BirdFlapDone
+.GM_BirdFlap:   
+    SET_POINTER GM_BirdPtr, GM_BIRD_1
+.GM_BirdFlapDone:   
+
     lda GM_BIRD_ANIM,Y
     sta GM_BirdYPos
 .GM_BirdAnimDone:
@@ -689,6 +702,9 @@ GM_NextFrame:
     lda #%00010000
     bit SWCHA
     bne .GM_CheckInputDown
+    lda GM_PlayerYPos
+    cmp #GAME_PLAYER_MAX_Y
+    beq .GM_CheckInputDown
     ldx #1
     inc GM_PlayerYPos
 
@@ -696,6 +712,9 @@ GM_NextFrame:
     lda #%00100000
     bit SWCHA
     bne .GM_CheckInputLeft
+    lda GM_PlayerYPos
+    cmp #GAME_PLAYER_MIN_Y
+    beq .GM_CheckInputLeft
     ldx #1
     dec GM_PlayerYPos
 
@@ -703,6 +722,9 @@ GM_NextFrame:
     lda #%01000000
     bit SWCHA
     bne .GM_CheckInputRight
+    lda GM_PlayerXPos
+    cmp #GAME_PLAYER_MIN_X
+    beq .GM_CheckInputRight
     lda #%00001000
     sta GM_BirdReflection
     ldx #1
@@ -712,6 +734,9 @@ GM_NextFrame:
     lda #%10000000
     bit SWCHA
     bne .GM_CheckInputDone
+    lda GM_PlayerXPos
+    cmp #GAME_PLAYER_MAX_X
+    beq .GM_CheckInputDone
     lda #0
     sta GM_BirdReflection
     ldx #1
