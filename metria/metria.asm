@@ -64,6 +64,7 @@ GAME_PLAYER_MIN_X = 0           ; player minimun x
 GAME_PLAYER_MAX_X = 146           ; player minimun x
 GAME_PLAYER_MIN_Y = 2           ; player minimun x
 GAME_PLAYER_MAX_Y = 62           ; player minimun x
+GAME_PLAYER_ANIM_SPEED = 10
 
 GAME_BIRD_HEIGHT = 6            ; bird sprite height
 GAME_BIRD_TICK_LEN = 10         ; bird anim speed
@@ -91,6 +92,9 @@ GM_PlayerPtr        ds 2
 GM_PlayerColorPtr   ds 2
 GM_PlayerXPos       ds 1
 GM_PlayerYPos       ds 1
+GM_PlayerAnimOn     ds 1
+GM_PlayerAnimFrame  ds 1
+GM_PlayerAnimTicks  ds 1
 
 GM_BirdPtr          ds 2
 GM_BirdColorPtr     ds 2
@@ -456,9 +460,30 @@ GM_NextFrame:
     beq .GM_SetDress
 .GM_SetPants:
     SET_POINTER GM_PlayerPtr, GM_PANTS_IDLE
+    lda GM_PlayerAnimOn
+    beq .GM_SetGraphicsDone
+
+    lda GM_PlayerAnimFrame
+    bne .GM_PANTS2
+    SET_POINTER GM_PlayerPtr, GM_PANTS_WALK1
+    jmp .GM_SetGraphicsDone
+.GM_PANTS2
+    SET_POINTER GM_PlayerPtr, GM_PANTS_WALK2
+
     jmp .GM_SetGraphicsDone
 .GM_SetDress:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
+    lda GM_PlayerAnimOn
+    beq .GM_SetGraphicsDone
+
+    lda GM_PlayerAnimFrame
+    bne .GM_DRESS2
+    SET_POINTER GM_PlayerPtr, GM_DRESS_WALK1
+    jmp .GM_SetGraphicsDone
+.GM_DRESS2
+    SET_POINTER GM_PlayerPtr, GM_DRESS_WALK2
+
+    jmp .GM_SetGraphicsDone
 .GM_SetGraphicsDone:
 
 .GM_PlayfieldInit
@@ -591,7 +616,7 @@ GM_NextFrame:
     txa
     sec                         ; make sure carry flag is set
     sbc GM_PlayerYPos           ; subtract sprite Y coordinate
-    cmp GAME_PLAYER_HEIGHT      ; are we inside the sprite height bounds?
+    cmp #GAME_PLAYER_HEIGHT      ; are we inside the sprite height bounds?
     bcc .GM_WritePlayer         ; if result < height then A contains the index
     lda #0                      ; else, set A to 0
 .GM_WritePlayer:
@@ -743,6 +768,30 @@ GM_NextFrame:
     inc GM_PlayerXPos
 
 .GM_CheckInputDone:
+    cpx #0
+    beq .GM_SetNoPlayerAnim
+    lda #1
+    sta GM_PlayerAnimOn
+
+    lda GM_PlayerAnimTicks
+    bne .GM_NoNewFrame
+    lda GAME_PLAYER_ANIM_SPEED
+    sta GM_PlayerAnimTicks
+    inc GM_PlayerAnimFrame
+    lda GM_PlayerAnimFrame
+    and #1
+    sta GM_PlayerAnimFrame
+.GM_NoNewFrame:
+    dec GM_PlayerAnimTicks 
+.GM_FrameDone:
+
+
+    jmp .GM_SetPlayerAnimDone
+.GM_SetNoPlayerAnim:
+    lda #0
+    sta GM_PlayerAnimOn
+    sta GM_PlayerAnimTicks
+.GM_SetPlayerAnimDone:        
 
     cpx #1
     bne .GM_Continue
