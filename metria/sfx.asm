@@ -12,10 +12,11 @@
 ; each .byte line contains the Frequency data for a single sound effect.
 ; Frequency values range from 0-31
 SFX_F:
-    .byte 0, 31 ; collide
+    .byte 0, 15, 15, 15 ; collide
     .byte 0,  0,  0,  0,  1,  1,  1,  2,  2,  2,  3,  3,  3 ; collect
     .byte 0,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8 ; ping
     .byte 0, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31 ; game over
+    .byte 0, 28, 28, 28, 28 ,28 ,28 ,28, 28, 22, 22, 22, 22 ,22 ,22 ,22, 22, 18, 18, 18, 18 ,18 ,18 ,18, 18; test
  
 ; calculate size of SFX_F table and validate size
 SFX_Fcount = *-SFX_F
@@ -52,7 +53,7 @@ SFX_Fcount = *-SFX_F
 ; f = Electronic tones, mostly lows, extends to rumble.
 
 SFX_CV:
-    .byte 0,$8f ; collide
+    .byte 0,$ef,$ef,$ef ; collide
 sfxCOLLIDE = *-SFX_CV-1
     .byte 0,$6f,$6f,$6f,$6f,$6f,$6f,$6f,$6f,$6f,$6f,$6f,$6f ; collect
 sfxCOLLECT = *-SFX_CV-1
@@ -60,6 +61,8 @@ sfxCOLLECT = *-SFX_CV-1
 sfxPING = *-SFX_CV-1
     .byte 0,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf,$cf ; game over
 sfxGAMEOVER = *-SFX_CV-1
+    .byte 0,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f,$4f ; game over
+sfxTEST = *-SFX_CV-1
  
  ; calculate size of SFX_CV table and validate size
 SFX_CVcount = *-SFX_CV

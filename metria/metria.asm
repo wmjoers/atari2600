@@ -417,6 +417,9 @@ GM_NextFrame:
     bne .GM_HandleTimerDone 
     lda #1
     sta GameOver
+    ldy #sfxTEST
+    jsr SFX_TRIGGER
+
 .GM_HandleTimerDone
 
 .GM_SetColor:                   ; set correct colors
