@@ -1216,7 +1216,7 @@
     611  f305		       85 08		      sta	COLUPF
     612  f307		       a9 00		      lda	#$00	; load player color from lookup table
     613  f309		       85 07		      sta	COLUP1	; set color for player 1 slice
-    614  f30b		       a9 05		      lda	#%00000101
+    614  f30b		       a9 01		      lda	#%00000001
     615  f30d		       85 0a		      sta	CTRLPF	; enable playfield reflection
     616  f30f		       85 02		      sta	WSYNC
     617  f311		       a5 82		      lda	GM_BackgroundColor

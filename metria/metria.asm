@@ -611,7 +611,7 @@ GM_NextFrame:
     sta COLUPF
     lda #$00      ; load player color from lookup table
     sta COLUP1                  ; set color for player 1 slice
-    lda #%00000101
+    lda #%00000001
     sta CTRLPF                  ; enable playfield reflection
     sta WSYNC
     lda GM_BackgroundColor
