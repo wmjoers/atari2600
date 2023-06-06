@@ -37,12 +37,15 @@ GAME_BK_BW = $08                ; game background color - black & white
 GAME_PF_COLOR = $C0             ; game playfield color - color mode
 GAME_PF_BW = $02                ; game playfield color - black & white
 GAME_SKY_COLOR = $78            ; game sky color - color mode
-GAME_SKY_BW = $06               ; game sky color - black & white
-GAME_SCOREBOARD_COLOR = $0      ; game score board color - all modes
+GAME_SKY_BW = $04               ; game sky color - black & white
+GAME_SCOREBACK_COLOR = $0       ; game score board color - all modes
 
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
 
+GAME_BIRD_HEIGHT = 9            ; bird sprite height
+
+GAME_DIGIT_HEIGHT = 5           ; digit height
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RAM variables located outside ROM at address $0080
@@ -74,6 +77,15 @@ GM_PlayfieldIdx     ds 1
 
 PFCounter           ds 1
 Random              ds 1
+
+Score               ds 1        ; stored as BCD
+Timer               ds 1        ; stored as BCD
+TimerTick           ds 1
+OnesDigitOffset     ds 2
+TensDigitOffset     ds 2
+Temp                ds 1
+ScoreSprite         ds 5
+TimerSprite         ds 5
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program start - Located at top of ROM at address $F000
@@ -113,6 +125,9 @@ Reset:
     sta GM_BirdYPos
     lda #0
     sta GM_BirdReflection
+
+    lda #60
+    sta TimerTick
 
     lda #2
     sta VBLANK                  ; turn on VBLANK 
@@ -276,6 +291,18 @@ GM_NextFrame:
     ; -------------------------
     sta HMOVE                   ; apply positions offset
 
+    dec TimerTick
+    bne .GM_SecondNotDone    
+    sed
+    clc
+    lda Timer
+    adc #1
+    sta Timer
+    cld    
+    lda #60
+    sta TimerTick
+.GM_SecondNotDone
+
 .GM_SetColor:                   ; set correct colors
     lda SWCHB
     and BW_MASK
@@ -302,7 +329,7 @@ GM_NextFrame:
     SET_POINTER GM_BugColorPtr, GM_BUG_BW
     SET_POINTER GM_BirdColorPtr, GM_BIRD_BW
 .GM_SetColorDone:
-    lda #GAME_SCOREBOARD_COLOR
+    lda #GAME_SCOREBACK_COLOR
     sta COLUBK
 
 .GM_SetGraphics
@@ -320,6 +347,14 @@ GM_NextFrame:
     lda CXPPMM
     and #%10000000
     beq .GM_CheckCollisionsDone
+
+    sed
+    lda Score
+    clc
+    adc #1
+    sta Score
+    cld
+    
     jsr PlaceBug
 .GM_CheckCollisionsDone:
     sta CXCLR
@@ -327,6 +362,7 @@ GM_NextFrame:
 .GM_PlayfieldInit
     lda #71                     
     sta PFCounter               ; 144/2 scanelines
+    jsr PrepareScoreAndTimer
 
 .GM_VBLankWait:
     ldx INTIM
@@ -339,14 +375,48 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Score Board - 20 scanlines - 1520 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    lda #23
-    sta TIM64T                  ; set timer to 23x64 = 1472 mc
+    lda #$00
+    sta COLUBK
+    lda #$0E
+    sta COLUPF
+    
+    lda #0
+    sta PF0
+    sta PF1
+    sta PF2
+    lda #00000000
+    sta CTRLPF                  ; disable playfield/scoreboard reflection
 
-.GM_ScoreBoardWait:
-    ldx INTIM
-    bne .GM_ScoreBoardWait      ; wait until timer is done
-    sta WSYNC                   ; get a fresh scanline
+    ldx #5
+    WAIT_X_WSYNC
     ; -------------------------
+
+    ldy #5
+.GM_ScoreboardLoop:
+
+    REPEAT 2    
+        lda ScoreSprite,Y
+        sta PF1
+
+        REPEAT 13
+            nop
+        REPEND
+
+        lda TimerSprite,Y
+        sta PF1
+
+        sta WSYNC
+        ; -------------------------
+    REPEND
+
+    dey
+    bne .GM_ScoreboardLoop
+
+    lda #0
+    sta PF1
+
+    ldx #5
+    WAIT_X_WSYNC
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sky - 30 scanlines - 1520 mc
@@ -539,6 +609,88 @@ SetObjectXPos subroutine
         sta HMP0,Y              ; Set fine position value for object HMP0+Y
         sta RESP0,Y             ; Seset rough position for object HMP0+Y
         rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subroutine to handle scoreboard digits to be displayed on the screen
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; This is stored using BCD, so the display will be displayed in dec numbers.
+;; Converts the high and low nibbles of the variables Score and Timer
+;; into offsets into the digit lookup table so the values can be displayed.
+;; Each digit has a height of 5 bytes in the lookup table.
+;;
+;; For the low nibble we need to multiply by 5:
+;;   - we can use left shifts to perform multiplation by 2
+;;   - for any number N, the value of N*5 = (N*2*2)+N
+;;
+;; For the upper nibble, since it is already times 16, we need to divide it
+;; and then multiply it by 5:
+;;   - we can use right shift to perform division by 2
+;;   - for any number N, the value of (N/16)*5 = (N/4)+(N/16)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+PrepareScoreAndTimer subroutine
+    ldx #1                   ; X register is the loop counter
+.PrepareScoreLoop:           ; this will loop twice, first X=1, and then X=0
+
+    lda Score,X              ; load A with Timer (X=1) or Score (X=0)
+    and #$0F                 ; remove the tens digit by masking 4 bits 00001111
+    sta Temp                 ; save the value of A into Temp
+    asl                      ; shift left (it is now N*2)
+    asl                      ; shift left (it is now N*4)
+    adc Temp                 ; add the value saved in Temp (+N)
+    sta OnesDigitOffset,X    ; save A in OnesDigitOffset+1 or OnesDigitOffset
+
+    lda Score,X              ; load A with Timer (X=1) or Score (X=0)
+    and #$F0                 ; remove the ones digit by masking 4 bits 11110000
+    lsr                      ; shift right (it is now N/2)
+    lsr                      ; shift right (it is now N/4)
+    sta Temp                 ; save the value of A into Temp
+    lsr                      ; shift right (it is now N/8)
+    lsr                      ; shift right (it is now N/16)
+    adc Temp                 ; add the value saved in Temp (N/16+N/4)
+    sta TensDigitOffset,X    ; store A in TensDigitOffset+1 or TensDigitOffset
+    dex                      ; X--
+    bpl .PrepareScoreLoop    ; while X >= 0, loop to pass a second time
+
+    ldx #5
+.SpriteLoop
+
+    ldy TensDigitOffset
+    lda Digits,y
+    and #$F0
+    sta Temp 
+
+    ldy OnesDigitOffset
+    lda Digits,y
+    and #$0F
+    ora Temp
+    sta Temp 
+
+    lda Temp
+    sta ScoreSprite,X
+
+    ldy TensDigitOffset+1
+    lda Digits,y
+    and #$F0
+    sta Temp 
+
+    ldy OnesDigitOffset+1
+    lda Digits,y
+    and #$0F
+    ora Temp 
+    sta Temp
+
+    lda Temp
+    sta TimerSprite,X
+
+    inc TensDigitOffset
+    inc TensDigitOffset+1
+    inc OnesDigitOffset
+    inc OnesDigitOffset+1
+
+    dex
+    bne .SpriteLoop
+
+    rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup tabes
