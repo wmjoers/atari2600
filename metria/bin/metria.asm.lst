@@ -413,63 +413,69 @@
      38  0000 ????	       00 02	   GAME_PF_BW =	$02	; game playfield color - black & white
      39  0000 ????	       00 78	   GAME_SKY_COLOR =	$78	; game sky color - color mode
      40  0000 ????	       00 04	   GAME_SKY_BW =	$04	; game sky color - black & white
-     41  0000 ????	       00 00	   GAME_SCOREBACK_COLOR =	$0	; game score board color - all modes
-     42  0000 ????
-     43  0000 ????	       00 09	   GAME_PLAYER_HEIGHT =	9	; player sprite height
-     44  0000 ????	       00 09	   GAME_BUG_HEIGHT =	9	; bug sprite height
+     41  0000 ????
+     42  0000 ????	       00 00	   GAME_SCOREBACK_COLOR =	$0	; game score board color - all modes
+     43  0000 ????	       00 20	   GAME_GAMEOVER_COLOR =	$20	; game over color - color mode
+     44  0000 ????	       00 02	   GAME_GAMEOVER_BW =	$02	; game over color - black & white
      45  0000 ????
-     46  0000 ????	       00 09	   GAME_BIRD_HEIGHT =	9	; bird sprite height
-     47  0000 ????
-     48  0000 ????	       00 05	   GAME_DIGIT_HEIGHT =	5	; digit height
-     49  0000 ????
-     50  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     51  0000 ????						;; RAM variables located outside ROM at address $0080
-     52  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     53  0000 ????
-     54 U00a9 ????				      seg.u	variables
-     55 U0080					      org	$80	; RAM address memory start
-     56 U0080
-     57 U0080		       00	   LM_LogoFadeState ds	1	; current logo fade state
-     58 U0081		       00	   LM_LogoFadeDelay ds	1	; current logo fade delay
-     59 U0082
-     60 U0082		       00	   GM_BackgroundColor ds	1
-     61 U0083		       00	   GM_SkyColor ds	1
-     62 U0084
-     63 U0084		       00 00	   GM_PlayerPtr ds	2
-     64 U0086		       00 00	   GM_PlayerColorPtr ds	2
-     65 U0088		       00	   GM_PlayerXPos ds	1
-     66 U0089		       00	   GM_PlayerYPos ds	1
-     67 U008a
-     68 U008a		       00 00	   GM_BirdPtr ds	2
-     69 U008c		       00 00	   GM_BirdColorPtr ds	2
-     70 U008e		       00	   GM_BirdYPos ds	1
-     71 U008f		       00	   GM_BirdReflection ds	1
-     72 U0090
-     73 U0090		       00 00	   GM_BugColorPtr ds	2
-     74 U0092		       00	   GM_BugXPos ds	1
-     75 U0093		       00	   GM_BugYPos ds	1
-     76 U0094		       00	   GM_PlayfieldIdx ds	1
-     77 U0095
-     78 U0095		       00	   PFCounter  ds	1
-     79 U0096		       00	   Random     ds	1
-     80 U0097
-     81 U0097		       00	   Score      ds	1	; stored as BCD
-     82 U0098		       00	   Timer      ds	1	; stored as BCD
-     83 U0099		       00	   TimerTick  ds	1
-     84 U009a		       00 00	   OnesDigitOffset ds	2
-     85 U009c		       00 00	   TensDigitOffset ds	2
-     86 U009e		       00	   Temp       ds	1
-     87 U009f		       00 00 00 00*ScoreSprite ds	5
-     88 U00a4		       00 00 00 00*TimerSprite ds	5
-     89 U00a9
-     90 U00a9							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     91 U00a9							;; Program start - Located at top of ROM at address $F000
-     92 U00a9							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     93 U00a9
-     94  10000 ????				       seg	code
-     95  f000					      org	$F000	; start address of ROM
-     96  f000
-     97  f000				   Reset
+     46  0000 ????	       00 09	   GAME_PLAYER_HEIGHT =	9	; player sprite height
+     47  0000 ????	       00 09	   GAME_BUG_HEIGHT =	9	; bug sprite height
+     48  0000 ????
+     49  0000 ????	       00 09	   GAME_BIRD_HEIGHT =	9	; bird sprite height
+     50  0000 ????
+     51  0000 ????	       00 05	   GAME_DIGIT_HEIGHT =	5	; digit height
+     52  0000 ????
+     53  0000 ????	       00 10	   GAME_MAX_TIME =	%00010000
+     54  0000 ????
+     55  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     56  0000 ????						;; RAM variables located outside ROM at address $0080
+     57  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     58  0000 ????
+     59 U00ac ????				      seg.u	variables
+     60 U0080					      org	$80	; RAM address memory start
+     61 U0080
+     62 U0080		       00	   LM_LogoFadeState ds	1	; current logo fade state
+     63 U0081		       00	   LM_LogoFadeDelay ds	1	; current logo fade delay
+     64 U0082
+     65 U0082		       00	   GM_BackgroundColor ds	1
+     66 U0083		       00	   GM_SkyColor ds	1
+     67 U0084
+     68 U0084		       00 00	   GM_PlayerPtr ds	2
+     69 U0086		       00 00	   GM_PlayerColorPtr ds	2
+     70 U0088		       00	   GM_PlayerXPos ds	1
+     71 U0089		       00	   GM_PlayerYPos ds	1
+     72 U008a
+     73 U008a		       00 00	   GM_BirdPtr ds	2
+     74 U008c		       00 00	   GM_BirdColorPtr ds	2
+     75 U008e		       00	   GM_BirdYPos ds	1
+     76 U008f		       00	   GM_BirdReflection ds	1
+     77 U0090
+     78 U0090		       00 00	   GM_BugColorPtr ds	2
+     79 U0092		       00	   GM_BugXPos ds	1
+     80 U0093		       00	   GM_BugYPos ds	1
+     81 U0094		       00	   GM_PlayfieldIdx ds	1
+     82 U0095
+     83 U0095		       00	   PFCounter  ds	1
+     84 U0096		       00	   Random     ds	1
+     85 U0097
+     86 U0097		       00	   GameOver   ds	1
+     87 U0098		       00	   Score      ds	1	; stored as BCD
+     88 U0099		       00	   Timer      ds	1	; stored as BCD
+     89 U009a		       00	   TimerTick  ds	1
+     90 U009b		       00 00	   OnesDigitOffset ds	2
+     91 U009d		       00 00	   TensDigitOffset ds	2
+     92 U009f		       00	   Temp       ds	1
+     93 U00a0		       00 00 00 00*ScoreSprite ds	6
+     94 U00a6		       00 00 00 00*TimerSprite ds	6
+     95 U00ac
+     96 U00ac							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     97 U00ac							;; Program start - Located at top of ROM at address $F000
+     98 U00ac							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     99 U00ac
+    100  10000 ????				       seg	code
+    101  f000					      org	$F000	; start address of ROM
+    102  f000
+    103  f000				   Reset
       0  f000					      CLEAN_START		; set machine to known state on startup
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -486,24 +492,24 @@
      13  f007		       48		      pha
      14  f008		       d0 fb		      bne	.CLEAR_STACK
      15  f00a
-     99  f00a
-    100  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    101  f00a							;; Init variables
-    102  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    103  f00a
-    104  f00a		       a9 72		      lda	#RANDOM_SEED
-    105  f00c		       85 96		      sta	Random
-    106  f00e
-    107  f00e		       a9 04		      lda	#LOGO_FADE_INIT_STATE
-    108  f010		       85 80		      sta	LM_LogoFadeState	; initialize logo fade state
-    109  f012		       a9 28		      lda	#LOGO_FADE_INIT_DELAY
-    110  f014		       85 81		      sta	LM_LogoFadeDelay	; initialize logo fade delay
-    111  f016
+    105  f00a
+    106  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    107  f00a							;; Init variables
+    108  f00a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    109  f00a
+    110  f00a		       a9 72		      lda	#RANDOM_SEED
+    111  f00c		       85 96		      sta	Random
+    112  f00e
+    113  f00e		       a9 04		      lda	#LOGO_FADE_INIT_STATE
+    114  f010		       85 80		      sta	LM_LogoFadeState	; initialize logo fade state
+    115  f012		       a9 28		      lda	#LOGO_FADE_INIT_DELAY
+    116  f014		       85 81		      sta	LM_LogoFadeDelay	; initialize logo fade delay
+    117  f016
       0  f016					      SET_POINTER	GM_PlayerPtr, GM_DRESS_IDLE
       1  f016				   .POINTER   SET	GM_PlayerPtr
       2  f016				   .ADDRESS   SET	GM_DRESS_IDLE
       3  f016
-      4  f016		       a9 03		      LDA	#<.ADDRESS
+      4  f016		       a9 43		      LDA	#<.ADDRESS
       5  f018		       85 84		      STA	.POINTER
       6  f01a		       a9 f4		      LDA	#>.ADDRESS
       7  f01c		       85 85		      STA	.POINTER+1
@@ -512,1090 +518,1140 @@
       1  f01e				   .POINTER   SET	GM_PlayerColorPtr
       2  f01e				   .ADDRESS   SET	GM_PLAYER_COLOR_IDLE
       3  f01e
-      4  f01e		       a9 54		      LDA	#<.ADDRESS
+      4  f01e		       a9 94		      LDA	#<.ADDRESS
       5  f020		       85 86		      STA	.POINTER
       6  f022		       a9 f4		      LDA	#>.ADDRESS
       7  f024		       85 87		      STA	.POINTER+1
       8  f026
-    114  f026
+    120  f026
       0  f026					      SET_POINTER	GM_BugColorPtr, GM_BUG_COLOR
       1  f026				   .POINTER   SET	GM_BugColorPtr
       2  f026				   .ADDRESS   SET	GM_BUG_COLOR
       3  f026
-      4  f026		       a9 8a		      LDA	#<.ADDRESS
+      4  f026		       a9 ca		      LDA	#<.ADDRESS
       5  f028		       85 90		      STA	.POINTER
       6  f02a		       a9 f4		      LDA	#>.ADDRESS
       7  f02c		       85 91		      STA	.POINTER+1
       8  f02e
-    116  f02e
+    122  f02e
       0  f02e					      SET_POINTER	GM_BirdPtr, GM_BIRD_1
       1  f02e				   .POINTER   SET	GM_BirdPtr
       2  f02e				   .ADDRESS   SET	GM_BIRD_1
       3  f02e
-      4  f02e		       a9 42		      LDA	#<.ADDRESS
+      4  f02e		       a9 82		      LDA	#<.ADDRESS
       5  f030		       85 8a		      STA	.POINTER
       6  f032		       a9 f4		      LDA	#>.ADDRESS
       7  f034		       85 8b		      STA	.POINTER+1
       8  f036
-    118  f036
-    119  f036		       a9 3e		      lda	#62
-    120  f038		       85 88		      sta	GM_PlayerXPos
-    121  f03a		       a9 15		      lda	#21
-    122  f03c		       85 89		      sta	GM_PlayerYPos
-    123  f03e
-    124  f03e		       a9 04		      lda	#4
-    125  f040		       85 8e		      sta	GM_BirdYPos
-    126  f042		       a9 00		      lda	#0
-    127  f044		       85 8f		      sta	GM_BirdReflection
-    128  f046
-    129  f046		       a9 3c		      lda	#60
-    130  f048		       85 99		      sta	TimerTick
-    131  f04a
-    132  f04a		       a9 02		      lda	#2
-    133  f04c		       85 01		      sta	VBLANK	; turn on VBLANK
-    134  f04e
-    135  f04e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    136  f04e							;; LOGO MODE - LM
-    137  f04e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    138  f04e				   LM_NextFrame
-      0  f04e					      VERTICAL_SYNC		; vertical sync - 3 scanlines
-      1  f04e		       a9 0e		      lda	#%1110
-      2  f050		       85 02	   .VSLP1     sta	WSYNC
-      3  f052		       85 00		      sta	VSYNC
-      4  f054		       4a		      lsr
-      5  f055		       d0 f9		      bne	.VSLP1
-    140  f057
-    141  f057							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    142  f057							;; Vertical Blank - 37 scanlines - 2812 mc
-    143  f057							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    144  f057		       a9 2b		      lda	#TIMER_VBLANK
-    145  f059		       8d 96 02 	      sta	TIM64T	; set timer to 43x64 = 2752 mc
-    146  f05c
-    147  f05c				   .LM_Fade		; handles logo fade in
-    148  f05c		       a5 80		      lda	LM_LogoFadeState
-    149  f05e		       c9 00		      cmp	#0
-    150  f060		       f0 0a		      beq	.LM_FadeDone	; if fade in is complete then jump out
-    151  f062		       c6 81		      dec	LM_LogoFadeDelay	; dec fade delay
-    152  f064		       d0 06		      bne	.LM_FadeDone	; if still waiting for delay then jump out
-    153  f066		       c6 80		      dec	LM_LogoFadeState	; dec fade in state
-    154  f068		       a9 14		      lda	#LOGO_FADE_DELAY
-    155  f06a		       85 81		      sta	LM_LogoFadeDelay	; restore fade in delay
-    156  f06c				   .LM_FadeDone
-    157  f06c
-    158  f06c				   .LM_SetColor 		; set correct colors
-    159  f06c		       a4 80		      ldy	LM_LogoFadeState	; set Y = index of logo color
-    160  f06e		       ad 82 02 	      lda	SWCHB	; load console switches
-    161  f071		       29 08		      and	#BW_MASK	; check if black & white
-    162  f073		       f0 0c		      beq	.LM_BWMode
-    163  f075				   .LM_ColorMode
-    164  f075		       a9 38		      lda	#LOGO_BK_COLOR
-    165  f077		       85 09		      sta	COLUBK	; set background color
-    166  f079		       b9 a9 f3 	      lda	LM_LogoFade_Color,Y
-    167  f07c		       85 08		      sta	COLUPF	; set logo color
-    168  f07e		       4c 8a f0 	      jmp	.LM_SetColorDone
-    169  f081				   .LM_BWMode
-    170  f081		       a9 06		      lda	#LOGO_BK_BW
-    171  f083		       85 09		      sta	COLUBK	; set background color
-    172  f085		       b9 ae f3 	      lda	LM_LogoFade_BW,Y
-    173  f088		       85 08		      sta	COLUPF	; set logo color
-    174  f08a				   .LM_SetColorDone
-    175  f08a
-    176  f08a		       e6 96		      inc	Random
-    177  f08c
-    178  f08c				   .LM_VBLankWait
-    179  f08c		       ae 84 02 	      ldx	INTIM
-    180  f08f		       d0 fb		      bne	.LM_VBLankWait	; wait until timer is done
-    181  f091		       a9 00		      lda	#0
-    182  f093		       85 02		      sta	WSYNC	; get a fresh scanline
-    183  f095							; -------------------------
-    184  f095		       85 01		      sta	VBLANK	; turn off VBLANK
-    185  f097
-    186  f097							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    187  f097							;; Playfield - 192 scanlines - 14592 mc
-    188  f097							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    189  f097
-    190  f097				   .LM_Top		; waste 68 scanlines
-    191  f097		       a2 44		      ldx	#68
-      0  f099					      WAIT_X_WSYNC
-      1  f099				   .WaitX
-      2  f099		       85 02		      sta	WSYNC
-      3  f09b		       ca		      dex
-      4  f09c		       d0 fb		      bne	.WaitX
-    193  f09e							; -------------------------
-    194  f09e
-    195  f09e				   .LM_Middle		; logo is a total of 36 scanlines
-    196  f09e		       a0 00		      ldy	#0	; Y = index to playfield bytes
-    197  f0a0				   .LM_LoopY
-    198  f0a0		       a2 04		      ldx	#4	; draw every logo line 4 scanlines
-    199  f0a2				   .LM_LoopX
-    200  f0a2		       85 02		      sta	WSYNC	; get fresh scanline
-    201  f0a4							; -------------------------
-    202  f0a4		       b9 73 f3 	      lda	LM_LogoPF0,Y
-    203  f0a7		       85 0d		      sta	PF0	; set first part of left playfield
-    204  f0a9		       b9 85 f3 	      lda	LM_LogoPF1,Y
-    205  f0ac		       85 0e		      sta	PF1	; set second part of left playfield
-    206  f0ae		       b9 97 f3 	      lda	LM_LogoPF2,Y
-    207  f0b1		       85 0f		      sta	PF2	; set third part of left playfield
-    208  f0b3		       c8		      iny		; inc Y to get the right playfield bytes
-    209  f0b4		       b9 73 f3 	      lda	LM_LogoPF0,Y
-    210  f0b7		       85 0d		      sta	PF0	; set first part of right playfield
-    211  f0b9		       b9 85 f3 	      lda	LM_LogoPF1,Y
-    212  f0bc		       85 0e		      sta	PF1	; set second part of right playfield
-    213  f0be		       b9 97 f3 	      lda	LM_LogoPF2,Y
-    214  f0c1		       88		      dey		; dec Y to bea able to repeat left/right for 4 lines
-    215  f0c2		       ea		      nop		; just for timing
-    216  f0c3		       85 0f		      sta	PF2	; set third part of right playfield
-    217  f0c5
-    218  f0c5		       ca		      dex
-    219  f0c6		       d0 da		      bne	.LM_LoopX	; loop while we havn't drawn 4 scanlines
-    220  f0c8		       c8		      iny
-    221  f0c9		       c8		      iny		; inc y by 2 to get to the next playfield byte pairs
-    222  f0ca		       c0 12		      cpy	#18	; all bytes drawn?
-    223  f0cc		       d0 d2		      bne	.LM_LoopY	; loop until all logo bytes are drawn
-    224  f0ce
-    225  f0ce				   .LM_TurnOffLogo		; use 1 scanline to turn off logo
-    226  f0ce		       a5 02		      lda	WSYNC	; get a fresh scanline
-    227  f0d0							; -------------------------
-    228  f0d0		       a9 00		      lda	#0
-    229  f0d2		       85 0d		      sta	PF0	; reset playfield graphics
-    230  f0d4		       85 0e		      sta	PF1
-    231  f0d6		       85 0f		      sta	PF2
-    232  f0d8
-    233  f0d8				   .LM_Bottom
-    234  f0d8		       a2 57		      ldx	#87	; waste remaining 87 scanlines
-      0  f0da					      WAIT_X_WSYNC
-      1  f0da				   .WaitX
-      2  f0da		       85 02		      sta	WSYNC
-      3  f0dc		       ca		      dex
-      4  f0dd		       d0 fb		      bne	.WaitX
-    236  f0df							; -------------------------
-    237  f0df
-    238  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    239  f0df							;; Overscan - 30 scanlines - 2280 mc
-    240  f0df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    241  f0df		       a9 02		      lda	#2	; A = 2 = #%00000010
-    242  f0e1		       85 01		      sta	VBLANK	; Turn on VBLANK
-    243  f0e3		       a9 23		      lda	#TIMER_OVERSCAN
-    244  f0e5		       8d 96 02 	      sta	TIM64T	; set timer to 35x64 = 2240 mc
-    245  f0e8
-    246  f0e8				   .LM_CheckReset
-    247  f0e8		       ad 82 02 	      lda	SWCHB	; load console switches
-    248  f0eb		       29 01		      and	#RESET_MASK
-    249  f0ed		       d0 03		      bne	.LM_NoReset
-    250  f0ef		       4c 00 f0 	      jmp	Reset	; jump to reset if reset button has been pressed
-    251  f0f2				   .LM_NoReset
-    252  f0f2
-    253  f0f2				   .LM_CheckLeftButton
-    254  f0f2		       a5 0c		      lda	INPT4	; load left joystick button
-    255  f0f4		       29 80		      and	#LEFT_BTN_MASK
-    256  f0f6		       d0 08		      bne	.LM_NoLeftButton
-    257  f0f8		       85 02		      sta	WSYNC
-    258  f0fa		       20 df f2 	      jsr	PlaceBug
-    259  f0fd		       4c 0a f1 	      jmp	GM_NextFrame	; start game if button is pressed
-    260  f100				   .LM_NoLeftButton
-    261  f100
-    262  f100				   .LM_OverscanWait
-    263  f100		       ae 84 02 	      ldx	INTIM
-    264  f103		       d0 fb		      bne	.LM_OverscanWait	; wait until timer is done
-    265  f105		       85 02		      sta	WSYNC
-    266  f107							; -------------------------
-    267  f107		       4c 4e f0 	      jmp	LM_NextFrame
-    268  f10a
-    269  f10a
-    270  f10a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    271  f10a							;; GAME MODE - GM
-    272  f10a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    273  f10a				   GM_NextFrame
-      0  f10a					      VERTICAL_SYNC		; Vertical sync - 3 scanlines
-      1  f10a		       a9 0e		      lda	#%1110
-      2  f10c		       85 02	   .VSLP1     sta	WSYNC
-      3  f10e		       85 00		      sta	VSYNC
-      4  f110		       4a		      lsr
-      5  f111		       d0 f9		      bne	.VSLP1
-    275  f113
-    276  f113							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    277  f113							;; Vertical Blank - 37 scanlines - 2812 mc
-    278  f113							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    279  f113		       a9 2b		      lda	#TIMER_VBLANK
-    280  f115		       8d 96 02 	      sta	TIM64T	; set timer to 43x64 = 2752 mc
-    281  f118
-    282  f118		       a5 88		      lda	GM_PlayerXPos	; load player x pos
-    283  f11a		       a0 00		      ldy	#0	; set Y = 0 for player 0
-    284  f11c		       20 02 f3 	      jsr	SetObjectXPos	; call subroutine to set object x pos
-    285  f11f
-    286  f11f		       a5 92		      lda	GM_BugXPos	; load bug x pos
-    287  f121		       a0 01		      ldy	#1	; set Y = 1 for player 1
-    288  f123		       20 02 f3 	      jsr	SetObjectXPos	; call subroutine to set object x pos
-    289  f126
-    290  f126		       85 02		      sta	WSYNC	; geta fresh scanline
-    291  f128							; -------------------------
-    292  f128		       85 2a		      sta	HMOVE	; apply positions offset
-    293  f12a
-    294  f12a		       c6 99		      dec	TimerTick
-    295  f12c		       d0 0d		      bne	.GM_SecondNotDone
-    296  f12e		       f8		      sed
-    297  f12f		       18		      clc
-    298  f130		       a5 98		      lda	Timer
-    299  f132		       69 01		      adc	#1
-    300  f134		       85 98		      sta	Timer
-    301  f136		       d8		      cld
-    302  f137		       a9 3c		      lda	#60
-    303  f139		       85 99		      sta	TimerTick
-    304  f13b				   .GM_SecondNotDone
-    305  f13b
-    306  f13b				   .GM_SetColor 		; set correct colors
-    307  f13b		       ad 82 02 	      lda	SWCHB
-    308  f13e		       25 08		      and	BW_MASK
-    309  f140		       f0 27		      beq	.GM_BWMode
-    310  f142				   .GM_ColorMode
-    311  f142		       a9 78		      lda	#GAME_SKY_COLOR
-    312  f144		       85 83		      sta	GM_SkyColor
-    313  f146		       a9 c8		      lda	#GAME_BK_COLOR
-    314  f148		       85 82		      sta	GM_BackgroundColor
-    315  f14a		       a9 c0		      lda	#GAME_PF_COLOR
-    316  f14c		       85 08		      sta	COLUPF
-      0  f14e					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
-      1  f14e				   .POINTER   SET	GM_PlayerColorPtr
-      2  f14e				   .ADDRESS   SET	GM_PLAYER_COLOR_IDLE
-      3  f14e
-      4  f14e		       a9 54		      LDA	#<.ADDRESS
-      5  f150		       85 86		      STA	.POINTER
-      6  f152		       a9 f4		      LDA	#>.ADDRESS
-      7  f154		       85 87		      STA	.POINTER+1
-      8  f156
-      0  f156					      SET_POINTER	GM_BugColorPtr, GM_BUG_COLOR
-      1  f156				   .POINTER   SET	GM_BugColorPtr
-      2  f156				   .ADDRESS   SET	GM_BUG_COLOR
-      3  f156
-      4  f156		       a9 8a		      LDA	#<.ADDRESS
-      5  f158		       85 90		      STA	.POINTER
-      6  f15a		       a9 f4		      LDA	#>.ADDRESS
-      7  f15c		       85 91		      STA	.POINTER+1
-      8  f15e
-      0  f15e					      SET_POINTER	GM_BirdColorPtr, GM_BIRD_COLOR
-      1  f15e				   .POINTER   SET	GM_BirdColorPtr
-      2  f15e				   .ADDRESS   SET	GM_BIRD_COLOR
-      3  f15e
-      4  f15e		       a9 9c		      LDA	#<.ADDRESS
-      5  f160		       85 8c		      STA	.POINTER
-      6  f162		       a9 f4		      LDA	#>.ADDRESS
-      7  f164		       85 8d		      STA	.POINTER+1
-      8  f166
-    320  f166		       4c 8d f1 	      jmp	.GM_SetColorDone
-    321  f169				   .GM_BWMode
-    322  f169		       a9 04		      lda	#GAME_SKY_BW
-    323  f16b		       85 83		      sta	GM_SkyColor
-    324  f16d		       a9 08		      lda	#GAME_BK_BW
-    325  f16f		       85 82		      sta	GM_BackgroundColor
-    326  f171		       a9 02		      lda	#GAME_PF_BW
-    327  f173		       85 08		      sta	COLUPF
-      0  f175					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
-      1  f175				   .POINTER   SET	GM_PlayerColorPtr
-      2  f175				   .ADDRESS   SET	GM_PLAYER_BW_IDLE
-      3  f175
-      4  f175		       a9 6f		      LDA	#<.ADDRESS
-      5  f177		       85 86		      STA	.POINTER
-      6  f179		       a9 f4		      LDA	#>.ADDRESS
-      7  f17b		       85 87		      STA	.POINTER+1
-      8  f17d
-      0  f17d					      SET_POINTER	GM_BugColorPtr, GM_BUG_BW
-      1  f17d				   .POINTER   SET	GM_BugColorPtr
-      2  f17d				   .ADDRESS   SET	GM_BUG_BW
-      3  f17d
-      4  f17d		       a9 93		      LDA	#<.ADDRESS
-      5  f17f		       85 90		      STA	.POINTER
-      6  f181		       a9 f4		      LDA	#>.ADDRESS
-      7  f183		       85 91		      STA	.POINTER+1
-      8  f185
-      0  f185					      SET_POINTER	GM_BirdColorPtr, GM_BIRD_BW
-      1  f185				   .POINTER   SET	GM_BirdColorPtr
-      2  f185				   .ADDRESS   SET	GM_BIRD_BW
-      3  f185
-      4  f185		       a9 a5		      LDA	#<.ADDRESS
-      5  f187		       85 8c		      STA	.POINTER
-      6  f189		       a9 f4		      LDA	#>.ADDRESS
-      7  f18b		       85 8d		      STA	.POINTER+1
-      8  f18d
-    331  f18d				   .GM_SetColorDone
-    332  f18d		       a9 00		      lda	#GAME_SCOREBACK_COLOR
-    333  f18f		       85 09		      sta	COLUBK
-    334  f191
-    335  f191				   .GM_SetGraphics
-    336  f191		       ad 82 02 	      lda	SWCHB
-    337  f194		       29 40		      and	#%01000000
-    338  f196		       f0 0b		      beq	.GM_SetDress
-    339  f198				   .GM_SetPants
-      0  f198					      SET_POINTER	GM_PlayerPtr, GM_PANTS_IDLE
-      1  f198				   .POINTER   SET	GM_PlayerPtr
-      2  f198				   .ADDRESS   SET	GM_PANTS_IDLE
+    124  f036
+    125  f036		       a9 3e		      lda	#62
+    126  f038		       85 88		      sta	GM_PlayerXPos
+    127  f03a		       a9 15		      lda	#21
+    128  f03c		       85 89		      sta	GM_PlayerYPos
+    129  f03e
+    130  f03e		       a9 04		      lda	#4
+    131  f040		       85 8e		      sta	GM_BirdYPos
+    132  f042		       a9 00		      lda	#0
+    133  f044		       85 8f		      sta	GM_BirdReflection
+    134  f046
+    135  f046		       a9 01		      lda	#1
+    136  f048		       85 9a		      sta	TimerTick
+    137  f04a		       a9 10		      lda	#GAME_MAX_TIME
+    138  f04c		       85 99		      sta	Timer
+    139  f04e
+    140  f04e		       a9 01		      lda	#1
+    141  f050		       85 97		      sta	GameOver
+    142  f052
+    143  f052		       a9 02		      lda	#2
+    144  f054		       85 01		      sta	VBLANK	; turn on VBLANK
+    145  f056
+    146  f056							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    147  f056							;; LOGO MODE - LM
+    148  f056							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    149  f056				   LM_NextFrame
+      0  f056					      VERTICAL_SYNC		; vertical sync - 3 scanlines
+      1  f056		       a9 0e		      lda	#%1110
+      2  f058		       85 02	   .VSLP1     sta	WSYNC
+      3  f05a		       85 00		      sta	VSYNC
+      4  f05c		       4a		      lsr
+      5  f05d		       d0 f9		      bne	.VSLP1
+    151  f05f
+    152  f05f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    153  f05f							;; Vertical Blank - 37 scanlines - 2812 mc
+    154  f05f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    155  f05f		       a9 2b		      lda	#TIMER_VBLANK
+    156  f061		       8d 96 02 	      sta	TIM64T	; set timer to 43x64 = 2752 mc
+    157  f064
+    158  f064				   .LM_Fade		; handles logo fade in
+    159  f064		       a5 80		      lda	LM_LogoFadeState
+    160  f066		       c9 00		      cmp	#0
+    161  f068		       f0 0a		      beq	.LM_FadeDone	; if fade in is complete then jump out
+    162  f06a		       c6 81		      dec	LM_LogoFadeDelay	; dec fade delay
+    163  f06c		       d0 06		      bne	.LM_FadeDone	; if still waiting for delay then jump out
+    164  f06e		       c6 80		      dec	LM_LogoFadeState	; dec fade in state
+    165  f070		       a9 14		      lda	#LOGO_FADE_DELAY
+    166  f072		       85 81		      sta	LM_LogoFadeDelay	; restore fade in delay
+    167  f074				   .LM_FadeDone
+    168  f074
+    169  f074				   .LM_SetColor 		; set correct colors
+    170  f074		       a4 80		      ldy	LM_LogoFadeState	; set Y = index of logo color
+    171  f076		       ad 82 02 	      lda	SWCHB	; load console switches
+    172  f079		       29 08		      and	#BW_MASK	; check if black & white
+    173  f07b		       f0 0c		      beq	.LM_BWMode
+    174  f07d				   .LM_ColorMode
+    175  f07d		       a9 38		      lda	#LOGO_BK_COLOR
+    176  f07f		       85 09		      sta	COLUBK	; set background color
+    177  f081		       b9 e9 f3 	      lda	LM_LogoFade_Color,Y
+    178  f084		       85 08		      sta	COLUPF	; set logo color
+    179  f086		       4c 92 f0 	      jmp	.LM_SetColorDone
+    180  f089				   .LM_BWMode
+    181  f089		       a9 06		      lda	#LOGO_BK_BW
+    182  f08b		       85 09		      sta	COLUBK	; set background color
+    183  f08d		       b9 ee f3 	      lda	LM_LogoFade_BW,Y
+    184  f090		       85 08		      sta	COLUPF	; set logo color
+    185  f092				   .LM_SetColorDone
+    186  f092
+    187  f092		       e6 96		      inc	Random
+    188  f094
+    189  f094				   .LM_VBLankWait
+    190  f094		       ae 84 02 	      ldx	INTIM
+    191  f097		       d0 fb		      bne	.LM_VBLankWait	; wait until timer is done
+    192  f099		       a9 00		      lda	#0
+    193  f09b		       85 02		      sta	WSYNC	; get a fresh scanline
+    194  f09d							; -------------------------
+    195  f09d		       85 01		      sta	VBLANK	; turn off VBLANK
+    196  f09f
+    197  f09f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    198  f09f							;; Playfield - 192 scanlines - 14592 mc
+    199  f09f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    200  f09f
+    201  f09f				   .LM_Top		; waste 68 scanlines
+    202  f09f		       a2 44		      ldx	#68
+      0  f0a1					      WAIT_X_WSYNC
+      1  f0a1				   .WaitX
+      2  f0a1		       85 02		      sta	WSYNC
+      3  f0a3		       ca		      dex
+      4  f0a4		       d0 fb		      bne	.WaitX
+    204  f0a6							; -------------------------
+    205  f0a6
+    206  f0a6				   .LM_Middle		; logo is a total of 36 scanlines
+    207  f0a6		       a0 00		      ldy	#0	; Y = index to playfield bytes
+    208  f0a8				   .LM_LoopY
+    209  f0a8		       a2 04		      ldx	#4	; draw every logo line 4 scanlines
+    210  f0aa				   .LM_LoopX
+    211  f0aa		       85 02		      sta	WSYNC	; get fresh scanline
+    212  f0ac							; -------------------------
+    213  f0ac		       b9 b3 f3 	      lda	LM_LogoPF0,Y
+    214  f0af		       85 0d		      sta	PF0	; set first part of left playfield
+    215  f0b1		       b9 c5 f3 	      lda	LM_LogoPF1,Y
+    216  f0b4		       85 0e		      sta	PF1	; set second part of left playfield
+    217  f0b6		       b9 d7 f3 	      lda	LM_LogoPF2,Y
+    218  f0b9		       85 0f		      sta	PF2	; set third part of left playfield
+    219  f0bb		       c8		      iny		; inc Y to get the right playfield bytes
+    220  f0bc		       b9 b3 f3 	      lda	LM_LogoPF0,Y
+    221  f0bf		       85 0d		      sta	PF0	; set first part of right playfield
+    222  f0c1		       b9 c5 f3 	      lda	LM_LogoPF1,Y
+    223  f0c4		       85 0e		      sta	PF1	; set second part of right playfield
+    224  f0c6		       b9 d7 f3 	      lda	LM_LogoPF2,Y
+    225  f0c9		       88		      dey		; dec Y to bea able to repeat left/right for 4 lines
+    226  f0ca		       ea		      nop		; just for timing
+    227  f0cb		       85 0f		      sta	PF2	; set third part of right playfield
+    228  f0cd
+    229  f0cd		       ca		      dex
+    230  f0ce		       d0 da		      bne	.LM_LoopX	; loop while we havn't drawn 4 scanlines
+    231  f0d0		       c8		      iny
+    232  f0d1		       c8		      iny		; inc y by 2 to get to the next playfield byte pairs
+    233  f0d2		       c0 12		      cpy	#18	; all bytes drawn?
+    234  f0d4		       d0 d2		      bne	.LM_LoopY	; loop until all logo bytes are drawn
+    235  f0d6
+    236  f0d6				   .LM_TurnOffLogo		; use 1 scanline to turn off logo
+    237  f0d6		       a5 02		      lda	WSYNC	; get a fresh scanline
+    238  f0d8							; -------------------------
+    239  f0d8		       a9 00		      lda	#0
+    240  f0da		       85 0d		      sta	PF0	; reset playfield graphics
+    241  f0dc		       85 0e		      sta	PF1
+    242  f0de		       85 0f		      sta	PF2
+    243  f0e0
+    244  f0e0				   .LM_Bottom
+    245  f0e0		       a2 57		      ldx	#87	; waste remaining 87 scanlines
+      0  f0e2					      WAIT_X_WSYNC
+      1  f0e2				   .WaitX
+      2  f0e2		       85 02		      sta	WSYNC
+      3  f0e4		       ca		      dex
+      4  f0e5		       d0 fb		      bne	.WaitX
+    247  f0e7							; -------------------------
+    248  f0e7
+    249  f0e7							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    250  f0e7							;; Overscan - 30 scanlines - 2280 mc
+    251  f0e7							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    252  f0e7		       a9 02		      lda	#2	; A = 2 = #%00000010
+    253  f0e9		       85 01		      sta	VBLANK	; Turn on VBLANK
+    254  f0eb		       a9 23		      lda	#TIMER_OVERSCAN
+    255  f0ed		       8d 96 02 	      sta	TIM64T	; set timer to 35x64 = 2240 mc
+    256  f0f0
+    257  f0f0				   .LM_CheckReset
+    258  f0f0		       ad 82 02 	      lda	SWCHB	; load console switches
+    259  f0f3		       29 01		      and	#RESET_MASK
+    260  f0f5		       d0 03		      bne	.LM_NoReset
+    261  f0f7		       4c 00 f0 	      jmp	Reset	; jump to reset if reset button has been pressed
+    262  f0fa				   .LM_NoReset
+    263  f0fa
+    264  f0fa				   .LM_CheckLeftButton
+    265  f0fa		       a5 0c		      lda	INPT4	; load left joystick button
+    266  f0fc		       29 80		      and	#LEFT_BTN_MASK
+    267  f0fe		       d0 08		      bne	.LM_NoLeftButton
+    268  f100		       85 02		      sta	WSYNC
+    269  f102		       20 1f f3 	      jsr	PlaceBug
+    270  f105		       4c 12 f1 	      jmp	GM_NextFrame	; start game if button is pressed
+    271  f108				   .LM_NoLeftButton
+    272  f108
+    273  f108				   .LM_OverscanWait
+    274  f108		       ae 84 02 	      ldx	INTIM
+    275  f10b		       d0 fb		      bne	.LM_OverscanWait	; wait until timer is done
+    276  f10d		       85 02		      sta	WSYNC
+    277  f10f							; -------------------------
+    278  f10f		       4c 56 f0 	      jmp	LM_NextFrame
+    279  f112
+    280  f112
+    281  f112							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    282  f112							;; GAME MODE - GM
+    283  f112							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    284  f112				   GM_NextFrame
+      0  f112					      VERTICAL_SYNC		; Vertical sync - 3 scanlines
+      1  f112		       a9 0e		      lda	#%1110
+      2  f114		       85 02	   .VSLP1     sta	WSYNC
+      3  f116		       85 00		      sta	VSYNC
+      4  f118		       4a		      lsr
+      5  f119		       d0 f9		      bne	.VSLP1
+    286  f11b
+    287  f11b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    288  f11b							;; Vertical Blank - 37 scanlines - 2812 mc
+    289  f11b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    290  f11b		       a9 2b		      lda	#TIMER_VBLANK
+    291  f11d		       8d 96 02 	      sta	TIM64T	; set timer to 43x64 = 2752 mc
+    292  f120
+    293  f120		       a5 88		      lda	GM_PlayerXPos	; load player x pos
+    294  f122		       a0 00		      ldy	#0	; set Y = 0 for player 0
+    295  f124		       20 42 f3 	      jsr	SetObjectXPos	; call subroutine to set object x pos
+    296  f127
+    297  f127		       a5 92		      lda	GM_BugXPos	; load bug x pos
+    298  f129		       a0 01		      ldy	#1	; set Y = 1 for player 1
+    299  f12b		       20 42 f3 	      jsr	SetObjectXPos	; call subroutine to set object x pos
+    300  f12e
+    301  f12e		       85 02		      sta	WSYNC	; geta fresh scanline
+    302  f130							; -------------------------
+    303  f130		       85 2a		      sta	HMOVE	; apply positions offset
+    304  f132
+    305  f132				   .GM_HandleTimer
+    306  f132		       a5 97		      lda	GameOver
+    307  f134		       d0 19		      bne	.GM_HandleTimerDone
+    308  f136
+    309  f136		       c6 9a		      dec	TimerTick
+    310  f138		       d0 15		      bne	.GM_HandleTimerDone
+    311  f13a
+    312  f13a		       a9 3c		      lda	#60
+    313  f13c		       85 9a		      sta	TimerTick
+    314  f13e
+    315  f13e		       f8		      sed
+    316  f13f		       a5 99		      lda	Timer
+    317  f141		       38		      sec
+    318  f142		       e9 01		      sbc	#1
+    319  f144		       85 99		      sta	Timer
+    320  f146		       d8		      cld
+    321  f147
+    322  f147		       a5 99		      lda	Timer
+    323  f149		       d0 04		      bne	.GM_HandleTimerDone
+    324  f14b		       a9 01		      lda	#1
+    325  f14d		       85 97		      sta	GameOver
+    326  f14f				   .GM_HandleTimerDone
+    327  f14f
+    328  f14f				   .GM_SetColor 		; set correct colors
+    329  f14f		       ad 82 02 	      lda	SWCHB
+    330  f152		       25 08		      and	BW_MASK
+    331  f154		       f0 36		      beq	.GM_BWMode
+    332  f156				   .GM_ColorMode
+    333  f156		       a9 78		      lda	#GAME_SKY_COLOR
+    334  f158		       85 83		      sta	GM_SkyColor
+    335  f15a		       a9 c8		      lda	#GAME_BK_COLOR
+    336  f15c		       85 82		      sta	GM_BackgroundColor
+    337  f15e		       a9 c0		      lda	#GAME_PF_COLOR
+    338  f160		       85 08		      sta	COLUPF
+      0  f162					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
+      1  f162				   .POINTER   SET	GM_PlayerColorPtr
+      2  f162				   .ADDRESS   SET	GM_PLAYER_COLOR_IDLE
+      3  f162
+      4  f162		       a9 94		      LDA	#<.ADDRESS
+      5  f164		       85 86		      STA	.POINTER
+      6  f166		       a9 f4		      LDA	#>.ADDRESS
+      7  f168		       85 87		      STA	.POINTER+1
+      8  f16a
+      0  f16a					      SET_POINTER	GM_BugColorPtr, GM_BUG_COLOR
+      1  f16a				   .POINTER   SET	GM_BugColorPtr
+      2  f16a				   .ADDRESS   SET	GM_BUG_COLOR
+      3  f16a
+      4  f16a		       a9 ca		      LDA	#<.ADDRESS
+      5  f16c		       85 90		      STA	.POINTER
+      6  f16e		       a9 f4		      LDA	#>.ADDRESS
+      7  f170		       85 91		      STA	.POINTER+1
+      8  f172
+      0  f172					      SET_POINTER	GM_BirdColorPtr, GM_BIRD_COLOR
+      1  f172				   .POINTER   SET	GM_BirdColorPtr
+      2  f172				   .ADDRESS   SET	GM_BIRD_COLOR
+      3  f172
+      4  f172		       a9 dc		      LDA	#<.ADDRESS
+      5  f174		       85 8c		      STA	.POINTER
+      6  f176		       a9 f4		      LDA	#>.ADDRESS
+      7  f178		       85 8d		      STA	.POINTER+1
+      8  f17a
+    342  f17a
+    343  f17a				   .GM_SetCoreboardColorCM
+    344  f17a		       a5 99		      lda	Timer
+    345  f17c		       f0 07		      beq	.GM_GameOverCM
+    346  f17e		       a9 00		      lda	#GAME_SCOREBACK_COLOR
+    347  f180		       85 09		      sta	COLUBK
+    348  f182		       4c 89 f1 	      jmp	.GM_SetScoreboardColorCMDone
+    349  f185				   .GM_GameOverCM
+    350  f185		       a9 20		      lda	#GAME_GAMEOVER_COLOR
+    351  f187		       85 09		      sta	COLUBK
+    352  f189				   .GM_SetScoreboardColorCMDone
+    353  f189
+    354  f189		       4c bf f1 	      jmp	.GM_SetColorDone
+    355  f18c				   .GM_BWMode
+    356  f18c		       a9 04		      lda	#GAME_SKY_BW
+    357  f18e		       85 83		      sta	GM_SkyColor
+    358  f190		       a9 08		      lda	#GAME_BK_BW
+    359  f192		       85 82		      sta	GM_BackgroundColor
+    360  f194		       a9 02		      lda	#GAME_PF_BW
+    361  f196		       85 08		      sta	COLUPF
+      0  f198					      SET_POINTER	GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
+      1  f198				   .POINTER   SET	GM_PlayerColorPtr
+      2  f198				   .ADDRESS   SET	GM_PLAYER_BW_IDLE
       3  f198
-      4  f198		       a9 1e		      LDA	#<.ADDRESS
-      5  f19a		       85 84		      STA	.POINTER
+      4  f198		       a9 af		      LDA	#<.ADDRESS
+      5  f19a		       85 86		      STA	.POINTER
       6  f19c		       a9 f4		      LDA	#>.ADDRESS
-      7  f19e		       85 85		      STA	.POINTER+1
+      7  f19e		       85 87		      STA	.POINTER+1
       8  f1a0
-    341  f1a0		       4c ab f1 	      jmp	.GM_SetGraphicsDone
-    342  f1a3				   .GM_SetDress
-      0  f1a3					      SET_POINTER	GM_PlayerPtr, GM_DRESS_IDLE
-      1  f1a3				   .POINTER   SET	GM_PlayerPtr
-      2  f1a3				   .ADDRESS   SET	GM_DRESS_IDLE
-      3  f1a3
-      4  f1a3		       a9 03		      LDA	#<.ADDRESS
-      5  f1a5		       85 84		      STA	.POINTER
-      6  f1a7		       a9 f4		      LDA	#>.ADDRESS
-      7  f1a9		       85 85		      STA	.POINTER+1
-      8  f1ab
-    344  f1ab				   .GM_SetGraphicsDone
-    345  f1ab
-    346  f1ab				   .GM_CheckCollisions
-    347  f1ab		       a5 07		      lda	CXPPMM
-    348  f1ad		       29 80		      and	#%10000000
-    349  f1af		       f0 0c		      beq	.GM_CheckCollisionsDone
-    350  f1b1
-    351  f1b1		       f8		      sed
-    352  f1b2		       a5 97		      lda	Score
-    353  f1b4		       18		      clc
-    354  f1b5		       69 01		      adc	#1
-    355  f1b7		       85 97		      sta	Score
-    356  f1b9		       d8		      cld
-    357  f1ba
-    358  f1ba		       20 df f2 	      jsr	PlaceBug
-    359  f1bd				   .GM_CheckCollisionsDone
-    360  f1bd		       85 2c		      sta	CXCLR
-    361  f1bf
-    362  f1bf				   .GM_PlayfieldInit
-    363  f1bf		       a9 47		      lda	#71
-    364  f1c1		       85 95		      sta	PFCounter	; 144/2 scanelines
-    365  f1c3		       20 16 f3 	      jsr	PrepareScoreAndTimer
-    366  f1c6
-    367  f1c6				   .GM_VBLankWait
-    368  f1c6		       ae 84 02 	      ldx	INTIM
-    369  f1c9		       d0 fb		      bne	.GM_VBLankWait	; wait until timer is done
-    370  f1cb		       a9 00		      lda	#0
-    371  f1cd		       85 02		      sta	WSYNC	; get a fresh scanline
-    372  f1cf							; -------------------------
-    373  f1cf		       85 01		      sta	VBLANK	; turn off VBLANK
-    374  f1d1
-    375  f1d1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    376  f1d1							;; Score Board - 20 scanlines - 1520 mc
-    377  f1d1							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    378  f1d1		       a9 00		      lda	#$00
-    379  f1d3		       85 09		      sta	COLUBK
-    380  f1d5		       a9 0e		      lda	#$0E
-    381  f1d7		       85 08		      sta	COLUPF
-    382  f1d9
-    383  f1d9		       a9 00		      lda	#0
-    384  f1db		       85 0d		      sta	PF0
-    385  f1dd		       85 0e		      sta	PF1
-    386  f1df		       85 0f		      sta	PF2
-    387  f1e1		       a9 00		      lda	#00000000
-    388  f1e3		       85 0a		      sta	CTRLPF	; disable playfield/scoreboard reflection
-    389  f1e5
-    390  f1e5		       a2 05		      ldx	#5
-      0  f1e7					      WAIT_X_WSYNC
-      1  f1e7				   .WaitX
-      2  f1e7		       85 02		      sta	WSYNC
-      3  f1e9		       ca		      dex
-      4  f1ea		       d0 fb		      bne	.WaitX
-    392  f1ec							; -------------------------
-    393  f1ec
-    394  f1ec		       a0 05		      ldy	#5
-    395  f1ee				   .GM_ScoreboardLoop
-    396  f1ee
-    397  f1ee					      REPEAT	2
-    398  f1ee		       b9 9f 00 	      lda	ScoreSprite,Y
-    399  f1f1		       85 0e		      sta	PF1
-    400  f1f3
-    401  f1f3					      REPEAT	13
-    402  f1f3		       ea		      nop
-    401  f1f3					      REPEND
-    402  f1f4		       ea		      nop
-    401  f1f4					      REPEND
-    402  f1f5		       ea		      nop
-    401  f1f5					      REPEND
-    402  f1f6		       ea		      nop
-    401  f1f6					      REPEND
-    402  f1f7		       ea		      nop
-    401  f1f7					      REPEND
-    402  f1f8		       ea		      nop
-    401  f1f8					      REPEND
-    402  f1f9		       ea		      nop
-    401  f1f9					      REPEND
-    402  f1fa		       ea		      nop
-    401  f1fa					      REPEND
-    402  f1fb		       ea		      nop
-    401  f1fb					      REPEND
-    402  f1fc		       ea		      nop
-    401  f1fc					      REPEND
-    402  f1fd		       ea		      nop
-    401  f1fd					      REPEND
-    402  f1fe		       ea		      nop
-    401  f1fe					      REPEND
-    402  f1ff		       ea		      nop
-    403  f200					      REPEND
-    404  f200
-    405  f200		       b9 a4 00 	      lda	TimerSprite,Y
-    406  f203		       85 0e		      sta	PF1
-    407  f205
-    408  f205		       85 02		      sta	WSYNC
-    409  f207							; -------------------------
-    397  f207					      REPEND
-    398  f207		       b9 9f 00 	      lda	ScoreSprite,Y
-    399  f20a		       85 0e		      sta	PF1
-    400  f20c
-    401  f20c					      REPEAT	13
-    402  f20c		       ea		      nop
-    401  f20c					      REPEND
-    402  f20d		       ea		      nop
-    401  f20d					      REPEND
-    402  f20e		       ea		      nop
-    401  f20e					      REPEND
-    402  f20f		       ea		      nop
-    401  f20f					      REPEND
-    402  f210		       ea		      nop
-    401  f210					      REPEND
-    402  f211		       ea		      nop
-    401  f211					      REPEND
-    402  f212		       ea		      nop
-    401  f212					      REPEND
-    402  f213		       ea		      nop
-    401  f213					      REPEND
-    402  f214		       ea		      nop
-    401  f214					      REPEND
-    402  f215		       ea		      nop
-    401  f215					      REPEND
-    402  f216		       ea		      nop
-    401  f216					      REPEND
-    402  f217		       ea		      nop
-    401  f217					      REPEND
-    402  f218		       ea		      nop
-    403  f219					      REPEND
-    404  f219
-    405  f219		       b9 a4 00 	      lda	TimerSprite,Y
-    406  f21c		       85 0e		      sta	PF1
-    407  f21e
-    408  f21e		       85 02		      sta	WSYNC
-    409  f220							; -------------------------
-    410  f220					      REPEND
-    411  f220
-    412  f220		       88		      dey
-    413  f221		       d0 cb		      bne	.GM_ScoreboardLoop
-    414  f223
-    415  f223		       a9 00		      lda	#0
-    416  f225		       85 0e		      sta	PF1
-    417  f227
-    418  f227		       a2 05		      ldx	#5
-      0  f229					      WAIT_X_WSYNC
-      1  f229				   .WaitX
-      2  f229		       85 02		      sta	WSYNC
-      3  f22b		       ca		      dex
-      4  f22c		       d0 fb		      bne	.WaitX
-    420  f22e
-    421  f22e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    422  f22e							;; Sky - 30 scanlines - 1520 mc
-    423  f22e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    424  f22e		       a5 83		      lda	GM_SkyColor
-    425  f230		       85 09		      sta	COLUBK
-    426  f232		       a2 0f		      ldx	#15
-    427  f234		       a9 00		      lda	#0
-    428  f236		       85 25		      sta	VDELP0	; clear vertical delay för player 0
-    429  f238
-    430  f238		       a5 8f		      lda	GM_BirdReflection
-    431  f23a		       85 0b		      sta	REFP0
-    432  f23c
-    433  f23c				   .GM_SkyLoop
-    434  f23c
-    435  f23c				   .GM_DrawBird
-    436  f23c		       8a		      txa		; transfer X to A
-    437  f23d		       38		      sec		; make sure carry flag is set
-    438  f23e		       e5 8e		      sbc	GM_BirdYPos	; subtract sprite Y coordinate
-    439  f240		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
-    440  f242		       90 02		      bcc	.GM_WriteBird	; if result < SpriteHeight, call subroutine
-    441  f244		       a9 00		      lda	#0	; else, set index to 0
-    442  f246				   .GM_WriteBird
-    443  f246		       a8		      tay
-    444  f247		       b1 8a		      lda	(GM_BirdPtr),Y	; load player bitmap slice of data
-    445  f249		       85 02		      sta	WSYNC	; wait for next scanline
-    446  f24b							; -------------------------
-    447  f24b		       85 1b		      sta	GRP0	; set graphics for player 0 slice
-    448  f24d		       b1 8c		      lda	(GM_BirdColorPtr),Y	; load player color from lookup table
-    449  f24f		       85 06		      sta	COLUP0	; set color for player 1 slice
-    450  f251				   .GM_DrawBirdDone
-    451  f251		       85 02		      sta	WSYNC	; wait for next scanline
-    452  f253							; -------------------------
-    453  f253		       ca		      dex
-    454  f254		       d0 e6		      bne	.GM_SkyLoop
-    455  f256
-    456  f256
-    457  f256							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    458  f256							;; Playfield - 152 scanlines - 11552 mc
-    459  f256							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    460  f256		       a5 82		      lda	GM_BackgroundColor
-    461  f258		       85 09		      sta	COLUBK
-    462  f25a		       a9 01		      lda	#1
-    463  f25c		       85 25		      sta	VDELP0	; set vertical delay för player 0
-    464  f25e		       a9 00		      lda	#0
-    465  f260		       85 0b		      sta	REFP0
-    466  f262
-    467  f262				   .GM_PlayfieldLoop
-    468  f262
-    469  f262				   .GM_DrawPlayer
-    470  f262		       a5 95		      lda	PFCounter	; A = current scanline in playfield
-    471  f264		       38		      sec		; make sure carry flag is set
-    472  f265		       e5 89		      sbc	GM_PlayerYPos	; subtract sprite Y coordinate
-    473  f267		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
-    474  f269		       90 02		      bcc	.GM_WritePlayer	; if result < height then A contains the index
-    475  f26b		       a9 00		      lda	#0	; else, set A to 0
-    476  f26d				   .GM_WritePlayer
-    477  f26d		       a8		      tay
-    478  f26e		       b1 84		      lda	(GM_PlayerPtr),Y	; load player bitmap slice of data
-    479  f270		       85 1b		      sta	GRP0	; set graphics for player 0 slice - delayed
-    480  f272		       b1 86		      lda	(GM_PlayerColorPtr),Y	; load player color from lookup table
-    481  f274		       aa		      tax
-    482  f275				   .GM_DrawPlayerDone
-    483  f275
-    484  f275				   .GM_DrawBug
-    485  f275		       a5 95		      lda	PFCounter	; transfer X to A
-    486  f277		       38		      sec		; make sure carry flag is set
-    487  f278		       e5 93		      sbc	GM_BugYPos	; subtract sprite Y coordinate
-    488  f27a		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
-    489  f27c		       90 02		      bcc	.GM_WriteBug	; if result < SpriteHeight, call subroutine
-    490  f27e		       a9 00		      lda	#0	; else, set index to 0
-    491  f280				   .GM_WriteBug
-    492  f280		       a8		      tay
-    493  f281		       b9 39 f4 	      lda	GM_BUG,Y	; load player bitmap slice of data
-    494  f284		       85 02		      sta	WSYNC	; wait for next scanline
-    495  f286							; -------------------------
-    496  f286		       85 1c		      sta	GRP1	; set graphics for player 1 + 0 slice
-    497  f288		       86 06		      stx	COLUP0	; set color for player 0 slice
-    498  f28a		       b1 90		      lda	(GM_BugColorPtr),Y	; load player color from lookup table
-    499  f28c		       85 07		      sta	COLUP1	; set color for player 1 slice
-    500  f28e				   .GM_DrawBugDone
-    501  f28e		       85 02		      sta	WSYNC
-    502  f290							; -------------------------
-    503  f290		       c6 95		      dec	PFCounter
-    504  f292		       d0 ce		      bne	.GM_PlayfieldLoop	; repeat next scanline until finished
-    505  f294		       85 02		      sta	WSYNC
-    506  f296
-    507  f296							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    508  f296							;; Overscan - 30 scanlines - 2280 mc
-    509  f296							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    510  f296		       a9 02		      lda	#2	; A = 2 = #%00000010
-    511  f298		       85 01		      sta	VBLANK	; Turn on VBLANK
-    512  f29a		       a9 23		      lda	#TIMER_OVERSCAN
-    513  f29c		       8d 96 02 	      sta	TIM64T	; set timer to 35x64 = 2240 mc
-    514  f29f
-    515  f29f				   .GM_CheckReset
-    516  f29f		       ad 82 02 	      lda	SWCHB	; load console switches
-    517  f2a2		       29 01		      and	#RESET_MASK
-    518  f2a4		       d0 03		      bne	.GM_NoReset
-    519  f2a6		       4c 00 f0 	      jmp	Reset	; jump to reset if reset button has been pressed
-    520  f2a9				   .GM_NoReset
-    521  f2a9
-    522  f2a9				   .GM_CheckInputUp
-    523  f2a9		       a9 10		      lda	#%00010000
-    524  f2ab		       2c 80 02 	      bit	SWCHA
-    525  f2ae		       d0 02		      bne	.GM_CheckInputDown
-    526  f2b0		       e6 89		      inc	GM_PlayerYPos
-    527  f2b2
-    528  f2b2				   .GM_CheckInputDown
-    529  f2b2		       a9 20		      lda	#%00100000
-    530  f2b4		       2c 80 02 	      bit	SWCHA
-    531  f2b7		       d0 02		      bne	.GM_CheckInputLeft
-    532  f2b9		       c6 89		      dec	GM_PlayerYPos
-    533  f2bb
-    534  f2bb				   .GM_CheckInputLeft
-    535  f2bb		       a9 40		      lda	#%01000000
-    536  f2bd		       2c 80 02 	      bit	SWCHA
-    537  f2c0		       d0 06		      bne	.GM_CheckInputRight
-    538  f2c2		       a9 08		      lda	#%00001000
-    539  f2c4		       85 8f		      sta	GM_BirdReflection
-    540  f2c6		       c6 88		      dec	GM_PlayerXPos
-    541  f2c8
-    542  f2c8				   .GM_CheckInputRight
-    543  f2c8		       a9 80		      lda	#%10000000
-    544  f2ca		       2c 80 02 	      bit	SWCHA
-    545  f2cd		       d0 06		      bne	.GM_CheckInputDone
-    546  f2cf		       a9 00		      lda	#0
-    547  f2d1		       85 8f		      sta	GM_BirdReflection
-    548  f2d3		       e6 88		      inc	GM_PlayerXPos
-    549  f2d5
-    550  f2d5				   .GM_CheckInputDone
-    551  f2d5
-    552  f2d5				   .GM_OverscanWait
-    553  f2d5		       ae 84 02 	      ldx	INTIM
-    554  f2d8		       d0 fb		      bne	.GM_OverscanWait	; wait until timer is done
-    555  f2da		       85 02		      sta	WSYNC
-    556  f2dc							; -------------------------
-    557  f2dc		       4c 0a f1 	      jmp	GM_NextFrame
-    558  f2df
-    559  f2df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    560  f2df							;; Subruotines
-    561  f2df							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    562  f2df
-    563  f2df				   PlaceBug   subroutine
-    564  f2df		       20 f2 f2 	      jsr	Randomize
-    565  f2e2		       a5 96		      lda	Random
-    566  f2e4		       29 7f		      and	#%01111111
-    567  f2e6		       85 92		      sta	GM_BugXPos
-    568  f2e8		       20 f2 f2 	      jsr	Randomize
-    569  f2eb		       a5 96		      lda	Random
-    570  f2ed		       29 3f		      and	#%00111111
-    571  f2ef		       85 93		      sta	GM_BugYPos
-    572  f2f1		       60		      rts
-    573  f2f2
-    574  f2f2				   Randomize  subroutine
-    575  f2f2		       a5 96		      lda	Random
-    576  f2f4		       0a		      asl
-    577  f2f5		       45 96		      eor	Random
-    578  f2f7		       0a		      asl
-    579  f2f8		       45 96		      eor	Random
-    580  f2fa		       0a		      asl
-    581  f2fb		       0a		      asl
-    582  f2fc		       45 96		      eor	Random
-    583  f2fe		       0a		      asl
-    584  f2ff		       26 96		      rol	Random	; performs a series of shifts and bit operations
-    585  f301		       60		      rts
-    586  f302
-    587  f302							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    588  f302							;; SetObjectXPos
-    589  f302							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    590  f302							;; A : Contains the the desired x-coordinate
-    591  f302							;; Y=0 : Player0
-    592  f302							;; Y=1 : Player1
-    593  f302							;; Y=2 : Missile0
-    594  f302							;; Y=3 : Missile1
-    595  f302							;; Y=4 : Ball
-    596  f302							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    597  f302
-    598  f302				   SetObjectXPos subroutine
-    599  f302		       38		      sec		; Set carry flag
-    600  f303		       85 02		      sta	WSYNC	; Get fresh scanline
-    601  f305							; -------------------------
-    602  f305				   .Div15Loop		; Divide A with 15 by subtraction in loop
-    603  f305		       e9 0f		      sbc	#15	; Subtract 15 from A
-    604  f307		       b0 fc		      bcs	.Div15Loop	; Loop if carry flag is set
-    605  f309		       49 07		      eor	#7	; Adjust the remainder in A between -8 and 7
-    606  f30b					      REPEAT	4	; Repeat 4 times
-    607  f30b		       0a		      asl		; Shift bits left by one
-    606  f30b					      REPEND		; End of repeat
-    607  f30c		       0a		      asl		; Shift bits left by one
-    606  f30c					      REPEND		; End of repeat
-    607  f30d		       0a		      asl		; Shift bits left by one
-    606  f30d					      REPEND		; End of repeat
-    607  f30e		       0a		      asl		; Shift bits left by one
-    608  f30f					      REPEND		; End of repeat
-    609  f30f		       99 20 00 	      sta	HMP0,Y	; Set fine position value for object HMP0+Y
-    610  f312		       99 10 00 	      sta	RESP0,Y	; Seset rough position for object HMP0+Y
-    611  f315		       60		      rts
-    612  f316
-    613  f316							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    614  f316							;; Subroutine to handle scoreboard digits to be displayed on the screen
-    615  f316							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    616  f316							;; This is stored using BCD, so the display will be displayed in dec numbers.
-    617  f316							;; Converts the high and low nibbles of the variables Score and Timer
-    618  f316							;; into offsets into the digit lookup table so the values can be displayed.
-    619  f316							;; Each digit has a height of 5 bytes in the lookup table.
-    620  f316							;;
-    621  f316							;; For the low nibble we need to multiply by 5:
-    622  f316							;;   - we can use left shifts to perform multiplation by 2
-    623  f316							;;   - for any number N, the value of N*5 = (N*2*2)+N
-    624  f316							;;
-    625  f316							;; For the upper nibble, since it is already times 16, we need to divide it
-    626  f316							;; and then multiply it by 5:
-    627  f316							;;   - we can use right shift to perform division by 2
-    628  f316							;;   - for any number N, the value of (N/16)*5 = (N/4)+(N/16)
-    629  f316							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    630  f316				   PrepareScoreAndTimer subroutine
-    631  f316		       a2 01		      ldx	#1	; X register is the loop counter
-    632  f318				   .PrepareScoreLoop		; this will loop twice, first X=1, and then X=0
-    633  f318
-    634  f318		       b5 97		      lda	Score,X	; load A with Timer (X=1) or Score (X=0)
-    635  f31a		       29 0f		      and	#$0F	; remove the tens digit by masking 4 bits 00001111
-    636  f31c		       85 9e		      sta	Temp	; save the value of A into Temp
-    637  f31e		       0a		      asl		; shift left (it is now N*2)
-    638  f31f		       0a		      asl		; shift left (it is now N*4)
-    639  f320		       65 9e		      adc	Temp	; add the value saved in Temp (+N)
-    640  f322		       95 9a		      sta	OnesDigitOffset,X	; save A in OnesDigitOffset+1 or OnesDigitOffset
-    641  f324
-    642  f324		       b5 97		      lda	Score,X	; load A with Timer (X=1) or Score (X=0)
-    643  f326		       29 f0		      and	#$F0	; remove the ones digit by masking 4 bits 11110000
-    644  f328		       4a		      lsr		; shift right (it is now N/2)
-    645  f329		       4a		      lsr		; shift right (it is now N/4)
-    646  f32a		       85 9e		      sta	Temp	; save the value of A into Temp
-    647  f32c		       4a		      lsr		; shift right (it is now N/8)
-    648  f32d		       4a		      lsr		; shift right (it is now N/16)
-    649  f32e		       65 9e		      adc	Temp	; add the value saved in Temp (N/16+N/4)
-    650  f330		       95 9c		      sta	TensDigitOffset,X	; store A in TensDigitOffset+1 or TensDigitOffset
-    651  f332		       ca		      dex		; X--
-    652  f333		       10 e3		      bpl	.PrepareScoreLoop	; while X >= 0, loop to pass a second time
-    653  f335
-    654  f335		       a2 05		      ldx	#5
-    655  f337				   .SpriteLoop
-    656  f337
-    657  f337		       a4 9c		      ldy	TensDigitOffset
-    658  f339		       b9 b3 f3 	      lda	Digits,y
-    659  f33c		       29 f0		      and	#$F0
-    660  f33e		       85 9e		      sta	Temp
-    661  f340
-    662  f340		       a4 9a		      ldy	OnesDigitOffset
-    663  f342		       b9 b3 f3 	      lda	Digits,y
-    664  f345		       29 0f		      and	#$0F
-    665  f347		       05 9e		      ora	Temp
-    666  f349		       85 9e		      sta	Temp
-    667  f34b
-    668  f34b		       a5 9e		      lda	Temp
-    669  f34d		       95 9f		      sta	ScoreSprite,X
-    670  f34f
-    671  f34f		       a4 9d		      ldy	TensDigitOffset+1
-    672  f351		       b9 b3 f3 	      lda	Digits,y
-    673  f354		       29 f0		      and	#$F0
-    674  f356		       85 9e		      sta	Temp
-    675  f358
-    676  f358		       a4 9b		      ldy	OnesDigitOffset+1
-    677  f35a		       b9 b3 f3 	      lda	Digits,y
-    678  f35d		       29 0f		      and	#$0F
-    679  f35f		       05 9e		      ora	Temp
-    680  f361		       85 9e		      sta	Temp
-    681  f363
-    682  f363		       a5 9e		      lda	Temp
-    683  f365		       95 a4		      sta	TimerSprite,X
-    684  f367
-    685  f367		       e6 9c		      inc	TensDigitOffset
-    686  f369		       e6 9d		      inc	TensDigitOffset+1
-    687  f36b		       e6 9a		      inc	OnesDigitOffset
-    688  f36d		       e6 9b		      inc	OnesDigitOffset+1
-    689  f36f
-    690  f36f		       ca		      dex
-    691  f370		       d0 c5		      bne	.SpriteLoop
-    692  f372
-    693  f372		       60		      rts
-    694  f373
-    695  f373							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    696  f373							;; Lookup tabes
-    697  f373							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    698  f373
-    699  f373							; https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/
-    700  f373							; mode: asymmetric repeat line-height 4
-    701  f373				   LM_LogoPF0
-    702  f373		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$00,$00,$00,$90
-    703  f37b		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$40,$00,$40
-    704  f383		       00 70		      .byte.b	$00,$70
-    705  f385				   LM_LogoPF1
-    706  f385		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$00,$05,$DE
-    707  f38d		       0a 42 0a 4e*	      .byte.b	$0A,$42,$0A,$4E,$08,$52,$08,$56
-    708  f395		       38 7b		      .byte.b	$38,$7B
-    709  f397				   LM_LogoPF2
-    710  f397		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$80,$00,$F8,$00
-    711  f39f		       a5 00 a5 00*	      .byte.b	$A5,$00,$A5,$00,$BF,$00,$85,$00
-    712  f3a7		       39 03		      .byte.b	$39,$03
-    713  f3a9
-    714  f3a9				   LM_LogoFade_Color
-    715  f3a9		       0e 3e 3c 3a*	      .byte.b	$0E,$3E,$3C,$3A,$38
-    716  f3ae
-    717  f3ae				   LM_LogoFade_BW
-    718  f3ae		       0e 0c 0a 08*	      .byte.b	$0E,$0C,$0A,$08,$06
-    719  f3b3
-    720  f3b3				   Digits
-    721  f3b3		       77		      .byte.b	%01110111	; ### ###
-    722  f3b4		       55		      .byte.b	%01010101	; # # # #
-    723  f3b5		       55		      .byte.b	%01010101	; # # # #
-    724  f3b6		       55		      .byte.b	%01010101	; # # # #
-    725  f3b7		       77		      .byte.b	%01110111	; ### ###
-    726  f3b8
-    727  f3b8		       11		      .byte.b	%00010001	;   #	 #
-    728  f3b9		       11		      .byte.b	%00010001	;   #	 #
-    729  f3ba		       11		      .byte.b	%00010001	;   #	 #
-    730  f3bb		       11		      .byte.b	%00010001	;   #	 #
-    731  f3bc		       11		      .byte.b	%00010001	;   #	 #
-    732  f3bd
-    733  f3bd		       77		      .byte.b	%01110111	; ### ###
-    734  f3be		       11		      .byte.b	%00010001	;   #	 #
-    735  f3bf		       77		      .byte.b	%01110111	; ### ###
-    736  f3c0		       44		      .byte.b	%01000100	; #   #
-    737  f3c1		       77		      .byte.b	%01110111	; ### ###
-    738  f3c2
-    739  f3c2		       77		      .byte.b	%01110111	; ### ###
-    740  f3c3		       11		      .byte.b	%00010001	;   #	 #
-    741  f3c4		       33		      .byte.b	%00110011	;  ##	##
-    742  f3c5		       11		      .byte.b	%00010001	;   #	 #
-    743  f3c6		       77		      .byte.b	%01110111	; ### ###
-    744  f3c7
-    745  f3c7		       55		      .byte.b	%01010101	; # # # #
-    746  f3c8		       55		      .byte.b	%01010101	; # # # #
-    747  f3c9		       77		      .byte.b	%01110111	; ### ###
-    748  f3ca		       11		      .byte.b	%00010001	;   #	 #
-    749  f3cb		       11		      .byte.b	%00010001	;   #	 #
-    750  f3cc
-    751  f3cc		       77		      .byte.b	%01110111	; ### ###
-    752  f3cd		       44		      .byte.b	%01000100	; #   #
-    753  f3ce		       77		      .byte.b	%01110111	; ### ###
-    754  f3cf		       11		      .byte.b	%00010001	;   #	 #
-    755  f3d0		       77		      .byte.b	%01110111	; ### ###
-    756  f3d1
-    757  f3d1		       77		      .byte.b	%01110111	; ### ###
-    758  f3d2		       44		      .byte.b	%01000100	; #   #
-    759  f3d3		       77		      .byte.b	%01110111	; ### ###
-    760  f3d4		       55		      .byte.b	%01010101	; # # # #
-    761  f3d5		       77		      .byte.b	%01110111	; ### ###
-    762  f3d6
-    763  f3d6		       77		      .byte.b	%01110111	; ### ###
-    764  f3d7		       11		      .byte.b	%00010001	;   #	 #
-    765  f3d8		       11		      .byte.b	%00010001	;   #	 #
-    766  f3d9		       11		      .byte.b	%00010001	;   #	 #
-    767  f3da		       11		      .byte.b	%00010001	;   #	 #
-    768  f3db
-    769  f3db		       77		      .byte.b	%01110111	; ### ###
-    770  f3dc		       55		      .byte.b	%01010101	; # # # #
-    771  f3dd		       77		      .byte.b	%01110111	; ### ###
-    772  f3de		       55		      .byte.b	%01010101	; # # # #
-    773  f3df		       77		      .byte.b	%01110111	; ### ###
-    774  f3e0
-    775  f3e0		       77		      .byte.b	%01110111	; ### ###
-    776  f3e1		       55		      .byte.b	%01010101	; # # # #
-    777  f3e2		       77		      .byte.b	%01110111	; ### ###
-    778  f3e3		       11		      .byte.b	%00010001	;   #	 #
-    779  f3e4		       77		      .byte.b	%01110111	; ### ###
-    780  f3e5
-    781  f3e5		       22		      .byte.b	%00100010	;  #	#
-    782  f3e6		       55		      .byte.b	%01010101	; # # # #
-    783  f3e7		       77		      .byte.b	%01110111	; ### ###
-    784  f3e8		       55		      .byte.b	%01010101	; # # # #
-    785  f3e9		       55		      .byte.b	%01010101	; # # # #
-    786  f3ea
-    787  f3ea		       77		      .byte.b	%01110111	; ### ###
-    788  f3eb		       55		      .byte.b	%01010101	; # # # #
-    789  f3ec		       66		      .byte.b	%01100110	; ##  ##
-    790  f3ed		       55		      .byte.b	%01010101	; # # # #
-    791  f3ee		       77		      .byte.b	%01110111	; ### ###
-    792  f3ef
-    793  f3ef		       77		      .byte.b	%01110111	; ### ###
-    794  f3f0		       44		      .byte.b	%01000100	; #   #
-    795  f3f1		       44		      .byte.b	%01000100	; #   #
-    796  f3f2		       44		      .byte.b	%01000100	; #   #
-    797  f3f3		       77		      .byte.b	%01110111	; ### ###
-    798  f3f4
-    799  f3f4		       66		      .byte.b	%01100110	; ##  ##
-    800  f3f5		       55		      .byte.b	%01010101	; # # # #
-    801  f3f6		       55		      .byte.b	%01010101	; # # # #
-    802  f3f7		       55		      .byte.b	%01010101	; # # # #
-    803  f3f8		       66		      .byte.b	%01100110	; ##  ##
-    804  f3f9
-    805  f3f9		       77		      .byte.b	%01110111	; ### ###
-    806  f3fa		       44		      .byte.b	%01000100	; #   #
-    807  f3fb		       77		      .byte.b	%01110111	; ### ###
-    808  f3fc		       44		      .byte.b	%01000100	; #   #
-    809  f3fd		       77		      .byte.b	%01110111	; ### ###
-    810  f3fe
-    811  f3fe		       77		      .byte.b	%01110111	; ### ###
-    812  f3ff		       44		      .byte.b	%01000100	; #   #
-    813  f400		       66		      .byte.b	%01100110	; ##  ##
-    814  f401		       44		      .byte.b	%01000100	; #   #
-    815  f402		       44		      .byte.b	%01000100	; #   #
-    816  f403
-    817  f403							;---Graphics Data from PlayerPal 2600---
-    818  f403
-    819  f403				   GM_DRESS_IDLE
-    820  f403		       00		      .byte.b	#0
-    821  f404		       7e		      .byte.b	#%01111110	;$70
-    822  f405		       7e		      .byte.b	#%01111110	;$70
-    823  f406		       3c		      .byte.b	#%00111100	;$70
-    824  f407		       5a		      .byte.b	#%01011010	;$84
-    825  f408		       7e		      .byte.b	#%01111110	;$84
-    826  f409		       18		      .byte.b	#%00011000	;$F4
-    827  f40a		       3c		      .byte.b	#%00111100	;$00
-    828  f40b		       18		      .byte.b	#%00011000	;$00
-    829  f40c				   GM_DRESS_WALK1
-    830  f40c		       00		      .byte.b	#0
-    831  f40d		       78		      .byte.b	#%01111000	;$70
-    832  f40e		       7e		      .byte.b	#%01111110	;$70
-    833  f40f		       3c		      .byte.b	#%00111100	;$70
-    834  f410		       1a		      .byte.b	#%00011010	;$84
-    835  f411		       7e		      .byte.b	#%01111110	;$84
-    836  f412		       18		      .byte.b	#%00011000	;$F4
-    837  f413		       3c		      .byte.b	#%00111100	;$00
-    838  f414		       18		      .byte.b	#%00011000	;$00
-    839  f415				   GM_DRESS_WALK2
-    840  f415		       00		      .byte.b	#0
-    841  f416		       1e		      .byte.b	#%00011110	;$70
-    842  f417		       7e		      .byte.b	#%01111110	;$70
-    843  f418		       3c		      .byte.b	#%00111100	;$70
-    844  f419		       58		      .byte.b	#%01011000	;$84
-    845  f41a		       7e		      .byte.b	#%01111110	;$84
-    846  f41b		       18		      .byte.b	#%00011000	;$F4
-    847  f41c		       3c		      .byte.b	#%00111100	;$00
-    848  f41d		       18		      .byte.b	#%00011000	;$00
-    849  f41e				   GM_PANTS_IDLE
-    850  f41e		       00		      .byte.b	#0
-    851  f41f		       66		      .byte.b	#%01100110	;$70
-    852  f420		       24		      .byte.b	#%00100100	;$70
-    853  f421		       3c		      .byte.b	#%00111100	;$70
-    854  f422		       5a		      .byte.b	#%01011010	;$84
-    855  f423		       7e		      .byte.b	#%01111110	;$84
-    856  f424		       18		      .byte.b	#%00011000	;$F4
-    857  f425		       3c		      .byte.b	#%00111100	;$00
-    858  f426		       18		      .byte.b	#%00011000	;$00
-    859  f427				   GM_PANTS_WALK1
-    860  f427		       00		      .byte.b	#0
-    861  f428		       60		      .byte.b	#%01100000	;$70
-    862  f429		       26		      .byte.b	#%00100110	;$70
-    863  f42a		       3c		      .byte.b	#%00111100	;$70
-    864  f42b		       1a		      .byte.b	#%00011010	;$84
-    865  f42c		       7e		      .byte.b	#%01111110	;$84
-    866  f42d		       18		      .byte.b	#%00011000	;$F4
-    867  f42e		       3c		      .byte.b	#%00111100	;$00
-    868  f42f		       18		      .byte.b	#%00011000	;$00
-    869  f430				   GM_PANTS_WALK2
-    870  f430		       00		      .byte.b	#0
-    871  f431		       06		      .byte.b	#%00000110	;$70
-    872  f432		       64		      .byte.b	#%01100100	;$70
-    873  f433		       3c		      .byte.b	#%00111100	;$70
-    874  f434		       58		      .byte.b	#%01011000	;$84
-    875  f435		       7e		      .byte.b	#%01111110	;$84
-    876  f436		       18		      .byte.b	#%00011000	;$F4
-    877  f437		       3c		      .byte.b	#%00111100	;$00
-    878  f438		       18		      .byte.b	#%00011000	;$00
-    879  f439				   GM_BUG
-    880  f439		       00		      .byte.b	#0
-    881  f43a		       00		      .byte.b	#%00000000	;$00
-    882  f43b		       00		      .byte.b	#%00000000	;$00
-    883  f43c		       52		      .byte.b	#%01010010	;$F0
-    884  f43d		       3c		      .byte.b	#%00111100	;$F0
-    885  f43e		       3c		      .byte.b	#%00111100	;$F2
-    886  f43f		       52		      .byte.b	#%01010010	;$F0
-    887  f440		       00		      .byte.b	#%00000000	;$00
-    888  f441		       00		      .byte.b	#%00000000	;$00
-    889  f442				   GM_BIRD_1
-    890  f442		       00		      .byte.b	#0
-    891  f443		       00		      .byte.b	#%00000000	;$1C
-    892  f444		       01		      .byte.b	#%00000001	;$1C
-    893  f445		       3f		      .byte.b	#%00111111	;$0E
-    894  f446		       fe		      .byte.b	#%11111110	;$0A
-    895  f447		       18		      .byte.b	#%00011000	;$0E
-    896  f448		       76		      .byte.b	#%01110110	;$0E
-    897  f449		       00		      .byte.b	#%00000000	;$0E
-    898  f44a		       00		      .byte.b	#%00000000	;$0E
-    899  f44b				   GM_BIRD_2
-    900  f44b		       00		      .byte.b	#0
-    901  f44c		       00		      .byte.b	#%00000000	;$1C
-    902  f44d		       01		      .byte.b	#%00000001	;$1C
-    903  f44e		       3f		      .byte.b	#%00111111	;$0E
-    904  f44f		       fe		      .byte.b	#%11111110	;$0A
-    905  f450		       f8		      .byte.b	#%11111000	;$0E
-    906  f451		       00		      .byte.b	#%00000000	;$0E
-    907  f452		       00		      .byte.b	#%00000000	;$0E
-    908  f453		       00		      .byte.b	#%00000000	;$0E
-    909  f454
-    910  f454							;---End Graphics Data---
-    911  f454
-    912  f454
-    913  f454							;---Color Data from PlayerPal 2600---
-    914  f454				   GM_PLAYER_COLOR_IDLE
-    915  f454		       00		      .byte.b	#0
-    916  f455		       70		      .byte.b	#$70	;
-    917  f456		       70		      .byte.b	#$70	;
-    918  f457		       70		      .byte.b	#$70	;
-    919  f458		       84		      .byte.b	#$84	;
-    920  f459		       84		      .byte.b	#$84	;
-    921  f45a		       f4		      .byte.b	#$F4	;
-    922  f45b		       00		      .byte.b	#$00	;
-    923  f45c		       00		      .byte.b	#$00	;
-    924  f45d				   GM_PLAYER_COLOR_WALK1
-    925  f45d		       00		      .byte.b	#0
-    926  f45e		       70		      .byte.b	#$70	;
-    927  f45f		       70		      .byte.b	#$70	;
-    928  f460		       70		      .byte.b	#$70	;
-    929  f461		       84		      .byte.b	#$84	;
-    930  f462		       84		      .byte.b	#$84	;
-    931  f463		       f4		      .byte.b	#$F4	;
-    932  f464		       00		      .byte.b	#$00	;
-    933  f465		       00		      .byte.b	#$00	;
-    934  f466				   GM_PLAYER_COLOR_WALK2
-    935  f466		       00		      .byte.b	#0
-    936  f467		       70		      .byte.b	#$70	;
-    937  f468		       70		      .byte.b	#$70	;
-    938  f469		       70		      .byte.b	#$70	;
-    939  f46a		       84		      .byte.b	#$84	;
-    940  f46b		       84		      .byte.b	#$84	;
-    941  f46c		       f4		      .byte.b	#$F4	;
-    942  f46d		       00		      .byte.b	#$00	;
-    943  f46e		       00		      .byte.b	#$00	;
-    944  f46f				   GM_PLAYER_BW_IDLE
-    945  f46f		       00		      .byte.b	#0
-    946  f470		       00		      .byte.b	#$0	;
-    947  f471		       00		      .byte.b	#$0	;
-    948  f472		       00		      .byte.b	#$0	;
-    949  f473		       02		      .byte.b	#$02	;
-    950  f474		       02		      .byte.b	#$02	;
-    951  f475		       04		      .byte.b	#$04	;
-    952  f476		       00		      .byte.b	#$00	;
-    953  f477		       00		      .byte.b	#$00	;
-    954  f478				   GM_PLAYER_BW_WALK1
-    955  f478		       00		      .byte.b	#0
-    956  f479		       00		      .byte.b	#$0	;
-    957  f47a		       00		      .byte.b	#$0	;
-    958  f47b		       00		      .byte.b	#$0	;
-    959  f47c		       02		      .byte.b	#$02	;
-    960  f47d		       02		      .byte.b	#$02	;
-    961  f47e		       04		      .byte.b	#$04	;
-    962  f47f		       00		      .byte.b	#$00	;
-    963  f480		       00		      .byte.b	#$00	;
-    964  f481				   GM_PLAYER_BW_WALK2
-    965  f481		       00		      .byte.b	#0
-    966  f482		       00		      .byte.b	#$0	;
-    967  f483		       00		      .byte.b	#$0	;
-    968  f484		       00		      .byte.b	#$0	;
-    969  f485		       02		      .byte.b	#$02	;
-    970  f486		       02		      .byte.b	#$02	;
-    971  f487		       04		      .byte.b	#$04	;
-    972  f488		       00		      .byte.b	#$00	;
-    973  f489		       00		      .byte.b	#$00	;
-    974  f48a				   GM_BUG_COLOR
-    975  f48a		       00		      .byte.b	#0
-    976  f48b		       00		      .byte.b	#$00	;
-    977  f48c		       00		      .byte.b	#$00	;
-    978  f48d		       f0		      .byte.b	#$F0	;
-    979  f48e		       f0		      .byte.b	#$F0	;
-    980  f48f		       f2		      .byte.b	#$F2	;
-    981  f490		       f0		      .byte.b	#$F0	;
-    982  f491		       00		      .byte.b	#$00	;
-    983  f492		       00		      .byte.b	#$00	;
-    984  f493				   GM_BUG_BW
-    985  f493		       00		      .byte.b	#0
-    986  f494		       00		      .byte.b	#$00	;
-    987  f495		       00		      .byte.b	#$00	;
-    988  f496		       00		      .byte.b	#$00	;
-    989  f497		       00		      .byte.b	#$00	;
-    990  f498		       02		      .byte.b	#$02	;
-    991  f499		       00		      .byte.b	#$00	;
-    992  f49a		       00		      .byte.b	#$00	;
-    993  f49b		       00		      .byte.b	#$00	;
-    994  f49c				   GM_BIRD_COLOR
-    995  f49c		       00		      .byte.b	#0
-    996  f49d		       1c		      .byte.b	#$1C	;
-    997  f49e		       1c		      .byte.b	#$1C	;
-    998  f49f		       0e		      .byte.b	#$0E	;
-    999  f4a0		       0a		      .byte.b	#$0A	;
-   1000  f4a1		       0e		      .byte.b	#$0E	;
-   1001  f4a2		       0e		      .byte.b	#$0E	;
-   1002  f4a3		       0e		      .byte.b	#$0E	;
-   1003  f4a4		       0e		      .byte.b	#$0E	;
-   1004  f4a5				   GM_BIRD_BW
-   1005  f4a5		       00		      .byte.b	#0
-   1006  f4a6		       0c		      .byte.b	#$0C	;
-   1007  f4a7		       0c		      .byte.b	#$0C	;
-   1008  f4a8		       0e		      .byte.b	#$0E	;
-   1009  f4a9		       0a		      .byte.b	#$0A	;
-   1010  f4aa		       0e		      .byte.b	#$0E	;
-   1011  f4ab		       0e		      .byte.b	#$0E	;
-   1012  f4ac		       0e		      .byte.b	#$0E	;
-   1013  f4ad		       0e		      .byte.b	#$0E	;
-   1014  f4ae
-   1015  f4ae							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   1016  f4ae							;; Fill the 4K ROM
-   1017  f4ae							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   1018  fffc					      org	$FFFC	; insert two pointers at the end of ROM
-   1019  fffc		       00 f0		      .word.w	Reset	; reset vector
-   1020  fffe		       00 f0		      .word.w	Reset	; interrupt Vector
-   1021  10000
-   1022  10000
+      0  f1a0					      SET_POINTER	GM_BugColorPtr, GM_BUG_BW
+      1  f1a0				   .POINTER   SET	GM_BugColorPtr
+      2  f1a0				   .ADDRESS   SET	GM_BUG_BW
+      3  f1a0
+      4  f1a0		       a9 d3		      LDA	#<.ADDRESS
+      5  f1a2		       85 90		      STA	.POINTER
+      6  f1a4		       a9 f4		      LDA	#>.ADDRESS
+      7  f1a6		       85 91		      STA	.POINTER+1
+      8  f1a8
+      0  f1a8					      SET_POINTER	GM_BirdColorPtr, GM_BIRD_BW
+      1  f1a8				   .POINTER   SET	GM_BirdColorPtr
+      2  f1a8				   .ADDRESS   SET	GM_BIRD_BW
+      3  f1a8
+      4  f1a8		       a9 e5		      LDA	#<.ADDRESS
+      5  f1aa		       85 8c		      STA	.POINTER
+      6  f1ac		       a9 f4		      LDA	#>.ADDRESS
+      7  f1ae		       85 8d		      STA	.POINTER+1
+      8  f1b0
+    365  f1b0
+    366  f1b0				   .GM_SetCoreboardColorBW
+    367  f1b0		       a5 99		      lda	Timer
+    368  f1b2		       f0 07		      beq	.GM_GameOverBW
+    369  f1b4		       a9 00		      lda	#GAME_SCOREBACK_COLOR
+    370  f1b6		       85 09		      sta	COLUBK
+    371  f1b8		       4c bf f1 	      jmp	.GM_SetScoreboardColorBWDone
+    372  f1bb				   .GM_GameOverBW
+    373  f1bb		       a9 02		      lda	#GAME_GAMEOVER_BW
+    374  f1bd		       85 09		      sta	COLUBK
+    375  f1bf				   .GM_SetScoreboardColorBWDone
+    376  f1bf
+    377  f1bf				   .GM_SetColorDone
+    378  f1bf
+    379  f1bf				   .GM_SetGraphics
+    380  f1bf		       ad 82 02 	      lda	SWCHB
+    381  f1c2		       29 40		      and	#%01000000
+    382  f1c4		       f0 0b		      beq	.GM_SetDress
+    383  f1c6				   .GM_SetPants
+      0  f1c6					      SET_POINTER	GM_PlayerPtr, GM_PANTS_IDLE
+      1  f1c6				   .POINTER   SET	GM_PlayerPtr
+      2  f1c6				   .ADDRESS   SET	GM_PANTS_IDLE
+      3  f1c6
+      4  f1c6		       a9 5e		      LDA	#<.ADDRESS
+      5  f1c8		       85 84		      STA	.POINTER
+      6  f1ca		       a9 f4		      LDA	#>.ADDRESS
+      7  f1cc		       85 85		      STA	.POINTER+1
+      8  f1ce
+    385  f1ce		       4c d9 f1 	      jmp	.GM_SetGraphicsDone
+    386  f1d1				   .GM_SetDress
+      0  f1d1					      SET_POINTER	GM_PlayerPtr, GM_DRESS_IDLE
+      1  f1d1				   .POINTER   SET	GM_PlayerPtr
+      2  f1d1				   .ADDRESS   SET	GM_DRESS_IDLE
+      3  f1d1
+      4  f1d1		       a9 43		      LDA	#<.ADDRESS
+      5  f1d3		       85 84		      STA	.POINTER
+      6  f1d5		       a9 f4		      LDA	#>.ADDRESS
+      7  f1d7		       85 85		      STA	.POINTER+1
+      8  f1d9
+    388  f1d9				   .GM_SetGraphicsDone
+    389  f1d9
+    390  f1d9				   .GM_CheckCollisions
+    391  f1d9		       a5 07		      lda	CXPPMM
+    392  f1db		       29 80		      and	#%10000000
+    393  f1dd		       f0 0c		      beq	.GM_CheckCollisionsDone
+    394  f1df
+    395  f1df		       f8		      sed
+    396  f1e0		       a5 98		      lda	Score
+    397  f1e2		       18		      clc
+    398  f1e3		       69 01		      adc	#1
+    399  f1e5		       85 98		      sta	Score
+    400  f1e7		       d8		      cld
+    401  f1e8
+    402  f1e8		       20 1f f3 	      jsr	PlaceBug
+    403  f1eb				   .GM_CheckCollisionsDone
+    404  f1eb		       85 2c		      sta	CXCLR
+    405  f1ed
+    406  f1ed				   .GM_PlayfieldInit
+    407  f1ed		       a9 47		      lda	#71
+    408  f1ef		       85 95		      sta	PFCounter	; 144/2 scanelines
+    409  f1f1		       20 56 f3 	      jsr	PrepareScoreAndTimer
+    410  f1f4
+    411  f1f4				   .GM_VBLankWait
+    412  f1f4		       ae 84 02 	      ldx	INTIM
+    413  f1f7		       d0 fb		      bne	.GM_VBLankWait	; wait until timer is done
+    414  f1f9		       a9 00		      lda	#0
+    415  f1fb		       85 02		      sta	WSYNC	; get a fresh scanline
+    416  f1fd							; -------------------------
+    417  f1fd		       85 01		      sta	VBLANK	; turn off VBLANK
+    418  f1ff
+    419  f1ff							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    420  f1ff							;; Score Board - 20 scanlines - 1520 mc
+    421  f1ff							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    422  f1ff		       a9 0e		      lda	#$0E
+    423  f201		       85 08		      sta	COLUPF
+    424  f203
+    425  f203		       a9 00		      lda	#0
+    426  f205		       85 0d		      sta	PF0
+    427  f207		       85 0e		      sta	PF1
+    428  f209		       85 0f		      sta	PF2
+    429  f20b		       a9 00		      lda	#00000000
+    430  f20d		       85 0a		      sta	CTRLPF	; disable playfield/scoreboard reflection
+    431  f20f
+    432  f20f		       a2 05		      ldx	#5
+      0  f211					      WAIT_X_WSYNC
+      1  f211				   .WaitX
+      2  f211		       85 02		      sta	WSYNC
+      3  f213		       ca		      dex
+      4  f214		       d0 fb		      bne	.WaitX
+    434  f216							; -------------------------
+    435  f216
+    436  f216		       a0 05		      ldy	#5
+    437  f218				   .GM_ScoreboardLoop
+    438  f218
+    439  f218					      REPEAT	2
+    440  f218		       b9 a0 00 	      lda	ScoreSprite,Y
+    441  f21b		       85 0e		      sta	PF1
+    442  f21d
+    443  f21d					      REPEAT	13
+    444  f21d		       ea		      nop
+    443  f21d					      REPEND
+    444  f21e		       ea		      nop
+    443  f21e					      REPEND
+    444  f21f		       ea		      nop
+    443  f21f					      REPEND
+    444  f220		       ea		      nop
+    443  f220					      REPEND
+    444  f221		       ea		      nop
+    443  f221					      REPEND
+    444  f222		       ea		      nop
+    443  f222					      REPEND
+    444  f223		       ea		      nop
+    443  f223					      REPEND
+    444  f224		       ea		      nop
+    443  f224					      REPEND
+    444  f225		       ea		      nop
+    443  f225					      REPEND
+    444  f226		       ea		      nop
+    443  f226					      REPEND
+    444  f227		       ea		      nop
+    443  f227					      REPEND
+    444  f228		       ea		      nop
+    443  f228					      REPEND
+    444  f229		       ea		      nop
+    445  f22a					      REPEND
+    446  f22a
+    447  f22a		       b9 a6 00 	      lda	TimerSprite,Y
+    448  f22d		       85 0e		      sta	PF1
+    449  f22f
+    450  f22f		       85 02		      sta	WSYNC
+    451  f231							; -------------------------
+    439  f231					      REPEND
+    440  f231		       b9 a0 00 	      lda	ScoreSprite,Y
+    441  f234		       85 0e		      sta	PF1
+    442  f236
+    443  f236					      REPEAT	13
+    444  f236		       ea		      nop
+    443  f236					      REPEND
+    444  f237		       ea		      nop
+    443  f237					      REPEND
+    444  f238		       ea		      nop
+    443  f238					      REPEND
+    444  f239		       ea		      nop
+    443  f239					      REPEND
+    444  f23a		       ea		      nop
+    443  f23a					      REPEND
+    444  f23b		       ea		      nop
+    443  f23b					      REPEND
+    444  f23c		       ea		      nop
+    443  f23c					      REPEND
+    444  f23d		       ea		      nop
+    443  f23d					      REPEND
+    444  f23e		       ea		      nop
+    443  f23e					      REPEND
+    444  f23f		       ea		      nop
+    443  f23f					      REPEND
+    444  f240		       ea		      nop
+    443  f240					      REPEND
+    444  f241		       ea		      nop
+    443  f241					      REPEND
+    444  f242		       ea		      nop
+    445  f243					      REPEND
+    446  f243
+    447  f243		       b9 a6 00 	      lda	TimerSprite,Y
+    448  f246		       85 0e		      sta	PF1
+    449  f248
+    450  f248		       85 02		      sta	WSYNC
+    451  f24a							; -------------------------
+    452  f24a					      REPEND
+    453  f24a
+    454  f24a		       88		      dey
+    455  f24b		       d0 cb		      bne	.GM_ScoreboardLoop
+    456  f24d
+    457  f24d		       a9 00		      lda	#0
+    458  f24f		       85 0e		      sta	PF1
+    459  f251
+    460  f251		       a2 05		      ldx	#5
+      0  f253					      WAIT_X_WSYNC
+      1  f253				   .WaitX
+      2  f253		       85 02		      sta	WSYNC
+      3  f255		       ca		      dex
+      4  f256		       d0 fb		      bne	.WaitX
+    462  f258
+    463  f258							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    464  f258							;; Sky - 30 scanlines - 1520 mc
+    465  f258							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    466  f258		       a5 83		      lda	GM_SkyColor
+    467  f25a		       85 09		      sta	COLUBK
+    468  f25c		       a2 0f		      ldx	#15
+    469  f25e		       a9 00		      lda	#0
+    470  f260		       85 25		      sta	VDELP0	; clear vertical delay för player 0
+    471  f262
+    472  f262		       a5 8f		      lda	GM_BirdReflection
+    473  f264		       85 0b		      sta	REFP0
+    474  f266
+    475  f266				   .GM_SkyLoop
+    476  f266
+    477  f266				   .GM_DrawBird
+    478  f266		       8a		      txa		; transfer X to A
+    479  f267		       38		      sec		; make sure carry flag is set
+    480  f268		       e5 8e		      sbc	GM_BirdYPos	; subtract sprite Y coordinate
+    481  f26a		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
+    482  f26c		       90 02		      bcc	.GM_WriteBird	; if result < SpriteHeight, call subroutine
+    483  f26e		       a9 00		      lda	#0	; else, set index to 0
+    484  f270				   .GM_WriteBird
+    485  f270		       a8		      tay
+    486  f271		       b1 8a		      lda	(GM_BirdPtr),Y	; load player bitmap slice of data
+    487  f273		       85 02		      sta	WSYNC	; wait for next scanline
+    488  f275							; -------------------------
+    489  f275		       85 1b		      sta	GRP0	; set graphics for player 0 slice
+    490  f277		       b1 8c		      lda	(GM_BirdColorPtr),Y	; load player color from lookup table
+    491  f279		       85 06		      sta	COLUP0	; set color for player 1 slice
+    492  f27b				   .GM_DrawBirdDone
+    493  f27b		       85 02		      sta	WSYNC	; wait for next scanline
+    494  f27d							; -------------------------
+    495  f27d		       ca		      dex
+    496  f27e		       d0 e6		      bne	.GM_SkyLoop
+    497  f280
+    498  f280
+    499  f280							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    500  f280							;; Playfield - 152 scanlines - 11552 mc
+    501  f280							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    502  f280		       a5 82		      lda	GM_BackgroundColor
+    503  f282		       85 09		      sta	COLUBK
+    504  f284		       a9 01		      lda	#1
+    505  f286		       85 25		      sta	VDELP0	; set vertical delay för player 0
+    506  f288		       a9 00		      lda	#0
+    507  f28a		       85 0b		      sta	REFP0
+    508  f28c
+    509  f28c				   .GM_PlayfieldLoop
+    510  f28c
+    511  f28c				   .GM_DrawPlayer
+    512  f28c		       a5 95		      lda	PFCounter	; A = current scanline in playfield
+    513  f28e		       38		      sec		; make sure carry flag is set
+    514  f28f		       e5 89		      sbc	GM_PlayerYPos	; subtract sprite Y coordinate
+    515  f291		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
+    516  f293		       90 02		      bcc	.GM_WritePlayer	; if result < height then A contains the index
+    517  f295		       a9 00		      lda	#0	; else, set A to 0
+    518  f297				   .GM_WritePlayer
+    519  f297		       a8		      tay
+    520  f298		       b1 84		      lda	(GM_PlayerPtr),Y	; load player bitmap slice of data
+    521  f29a		       85 1b		      sta	GRP0	; set graphics for player 0 slice - delayed
+    522  f29c		       b1 86		      lda	(GM_PlayerColorPtr),Y	; load player color from lookup table
+    523  f29e		       aa		      tax
+    524  f29f				   .GM_DrawPlayerDone
+    525  f29f
+    526  f29f				   .GM_DrawBug
+    527  f29f		       a5 95		      lda	PFCounter	; transfer X to A
+    528  f2a1		       38		      sec		; make sure carry flag is set
+    529  f2a2		       e5 93		      sbc	GM_BugYPos	; subtract sprite Y coordinate
+    530  f2a4		       c5 09		      cmp	GAME_PLAYER_HEIGHT	; are we inside the sprite height bounds?
+    531  f2a6		       90 02		      bcc	.GM_WriteBug	; if result < SpriteHeight, call subroutine
+    532  f2a8		       a9 00		      lda	#0	; else, set index to 0
+    533  f2aa				   .GM_WriteBug
+    534  f2aa		       a8		      tay
+    535  f2ab		       b9 79 f4 	      lda	GM_BUG,Y	; load player bitmap slice of data
+    536  f2ae		       85 02		      sta	WSYNC	; wait for next scanline
+    537  f2b0							; -------------------------
+    538  f2b0		       85 1c		      sta	GRP1	; set graphics for player 1 + 0 slice
+    539  f2b2		       86 06		      stx	COLUP0	; set color for player 0 slice
+    540  f2b4		       b1 90		      lda	(GM_BugColorPtr),Y	; load player color from lookup table
+    541  f2b6		       85 07		      sta	COLUP1	; set color for player 1 slice
+    542  f2b8				   .GM_DrawBugDone
+    543  f2b8		       85 02		      sta	WSYNC
+    544  f2ba							; -------------------------
+    545  f2ba		       c6 95		      dec	PFCounter
+    546  f2bc		       d0 ce		      bne	.GM_PlayfieldLoop	; repeat next scanline until finished
+    547  f2be		       85 02		      sta	WSYNC
+    548  f2c0
+    549  f2c0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    550  f2c0							;; Overscan - 30 scanlines - 2280 mc
+    551  f2c0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    552  f2c0		       a9 02		      lda	#2	; A = 2 = #%00000010
+    553  f2c2		       85 01		      sta	VBLANK	; Turn on VBLANK
+    554  f2c4		       a9 23		      lda	#TIMER_OVERSCAN
+    555  f2c6		       8d 96 02 	      sta	TIM64T	; set timer to 35x64 = 2240 mc
+    556  f2c9
+    557  f2c9				   .GM_CheckReset
+    558  f2c9		       ad 82 02 	      lda	SWCHB	; load console switches
+    559  f2cc		       29 01		      and	#RESET_MASK
+    560  f2ce		       d0 03		      bne	.GM_NoReset
+    561  f2d0		       4c 00 f0 	      jmp	Reset	; jump to reset if reset button has been pressed
+    562  f2d3				   .GM_NoReset
+    563  f2d3
+    564  f2d3		       a2 00		      ldx	#0
+    565  f2d5
+    566  f2d5				   .GM_CheckInputUp
+    567  f2d5		       a9 10		      lda	#%00010000
+    568  f2d7		       2c 80 02 	      bit	SWCHA
+    569  f2da		       d0 04		      bne	.GM_CheckInputDown
+    570  f2dc		       a2 01		      ldx	#1
+    571  f2de		       e6 89		      inc	GM_PlayerYPos
+    572  f2e0
+    573  f2e0				   .GM_CheckInputDown
+    574  f2e0		       a9 20		      lda	#%00100000
+    575  f2e2		       2c 80 02 	      bit	SWCHA
+    576  f2e5		       d0 04		      bne	.GM_CheckInputLeft
+    577  f2e7		       a2 01		      ldx	#1
+    578  f2e9		       c6 89		      dec	GM_PlayerYPos
+    579  f2eb
+    580  f2eb				   .GM_CheckInputLeft
+    581  f2eb		       a9 40		      lda	#%01000000
+    582  f2ed		       2c 80 02 	      bit	SWCHA
+    583  f2f0		       d0 08		      bne	.GM_CheckInputRight
+    584  f2f2		       a9 08		      lda	#%00001000
+    585  f2f4		       85 8f		      sta	GM_BirdReflection
+    586  f2f6		       a2 01		      ldx	#1
+    587  f2f8		       c6 88		      dec	GM_PlayerXPos
+    588  f2fa
+    589  f2fa				   .GM_CheckInputRight
+    590  f2fa		       a9 80		      lda	#%10000000
+    591  f2fc		       2c 80 02 	      bit	SWCHA
+    592  f2ff		       d0 08		      bne	.GM_CheckInputDone
+    593  f301		       a9 00		      lda	#0
+    594  f303		       85 8f		      sta	GM_BirdReflection
+    595  f305		       a2 01		      ldx	#1
+    596  f307		       e6 88		      inc	GM_PlayerXPos
+    597  f309
+    598  f309				   .GM_CheckInputDone
+    599  f309
+    600  f309		       e0 01		      cpx	#1
+    601  f30b		       d0 08		      bne	.GM_Continue
+    602  f30d		       a5 99		      lda	Timer
+    603  f30f		       f0 04		      beq	.GM_Continue
+    604  f311		       a9 00		      lda	#0
+    605  f313		       85 97		      sta	GameOver
+    606  f315				   .GM_Continue
+    607  f315
+    608  f315				   .GM_OverscanWait
+    609  f315		       ae 84 02 	      ldx	INTIM
+    610  f318		       d0 fb		      bne	.GM_OverscanWait	; wait until timer is done
+    611  f31a		       85 02		      sta	WSYNC
+    612  f31c							; -------------------------
+    613  f31c		       4c 12 f1 	      jmp	GM_NextFrame
+    614  f31f
+    615  f31f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    616  f31f							;; Subruotines
+    617  f31f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    618  f31f
+    619  f31f				   PlaceBug   subroutine
+    620  f31f		       20 32 f3 	      jsr	Randomize
+    621  f322		       a5 96		      lda	Random
+    622  f324		       29 7f		      and	#%01111111
+    623  f326		       85 92		      sta	GM_BugXPos
+    624  f328		       20 32 f3 	      jsr	Randomize
+    625  f32b		       a5 96		      lda	Random
+    626  f32d		       29 3f		      and	#%00111111
+    627  f32f		       85 93		      sta	GM_BugYPos
+    628  f331		       60		      rts
+    629  f332
+    630  f332				   Randomize  subroutine
+    631  f332		       a5 96		      lda	Random
+    632  f334		       0a		      asl
+    633  f335		       45 96		      eor	Random
+    634  f337		       0a		      asl
+    635  f338		       45 96		      eor	Random
+    636  f33a		       0a		      asl
+    637  f33b		       0a		      asl
+    638  f33c		       45 96		      eor	Random
+    639  f33e		       0a		      asl
+    640  f33f		       26 96		      rol	Random	; performs a series of shifts and bit operations
+    641  f341		       60		      rts
+    642  f342
+    643  f342							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    644  f342							;; SetObjectXPos
+    645  f342							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    646  f342							;; A : Contains the the desired x-coordinate
+    647  f342							;; Y=0 : Player0
+    648  f342							;; Y=1 : Player1
+    649  f342							;; Y=2 : Missile0
+    650  f342							;; Y=3 : Missile1
+    651  f342							;; Y=4 : Ball
+    652  f342							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    653  f342
+    654  f342				   SetObjectXPos subroutine
+    655  f342		       38		      sec		; Set carry flag
+    656  f343		       85 02		      sta	WSYNC	; Get fresh scanline
+    657  f345							; -------------------------
+    658  f345				   .Div15Loop		; Divide A with 15 by subtraction in loop
+    659  f345		       e9 0f		      sbc	#15	; Subtract 15 from A
+    660  f347		       b0 fc		      bcs	.Div15Loop	; Loop if carry flag is set
+    661  f349		       49 07		      eor	#7	; Adjust the remainder in A between -8 and 7
+    662  f34b					      REPEAT	4	; Repeat 4 times
+    663  f34b		       0a		      asl		; Shift bits left by one
+    662  f34b					      REPEND		; End of repeat
+    663  f34c		       0a		      asl		; Shift bits left by one
+    662  f34c					      REPEND		; End of repeat
+    663  f34d		       0a		      asl		; Shift bits left by one
+    662  f34d					      REPEND		; End of repeat
+    663  f34e		       0a		      asl		; Shift bits left by one
+    664  f34f					      REPEND		; End of repeat
+    665  f34f		       99 20 00 	      sta	HMP0,Y	; Set fine position value for object HMP0+Y
+    666  f352		       99 10 00 	      sta	RESP0,Y	; Seset rough position for object HMP0+Y
+    667  f355		       60		      rts
+    668  f356
+    669  f356							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    670  f356							;; Subroutine to handle scoreboard digits to be displayed on the screen
+    671  f356							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    672  f356							;; This is stored using BCD, so the display will be displayed in dec numbers.
+    673  f356							;; Converts the high and low nibbles of the variables Score and Timer
+    674  f356							;; into offsets into the digit lookup table so the values can be displayed.
+    675  f356							;; Each digit has a height of 5 bytes in the lookup table.
+    676  f356							;;
+    677  f356							;; For the low nibble we need to multiply by 5:
+    678  f356							;;   - we can use left shifts to perform multiplation by 2
+    679  f356							;;   - for any number N, the value of N*5 = (N*2*2)+N
+    680  f356							;;
+    681  f356							;; For the upper nibble, since it is already times 16, we need to divide it
+    682  f356							;; and then multiply it by 5:
+    683  f356							;;   - we can use right shift to perform division by 2
+    684  f356							;;   - for any number N, the value of (N/16)*5 = (N/4)+(N/16)
+    685  f356							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    686  f356				   PrepareScoreAndTimer subroutine
+    687  f356		       a2 01		      ldx	#1	; X register is the loop counter
+    688  f358				   .PrepareScoreLoop		; this will loop twice, first X=1, and then X=0
+    689  f358
+    690  f358		       b5 98		      lda	Score,X	; load A with Timer (X=1) or Score (X=0)
+    691  f35a		       29 0f		      and	#$0F	; remove the tens digit by masking 4 bits 00001111
+    692  f35c		       85 9f		      sta	Temp	; save the value of A into Temp
+    693  f35e		       0a		      asl		; shift left (it is now N*2)
+    694  f35f		       0a		      asl		; shift left (it is now N*4)
+    695  f360		       65 9f		      adc	Temp	; add the value saved in Temp (+N)
+    696  f362		       95 9b		      sta	OnesDigitOffset,X	; save A in OnesDigitOffset+1 or OnesDigitOffset
+    697  f364
+    698  f364		       b5 98		      lda	Score,X	; load A with Timer (X=1) or Score (X=0)
+    699  f366		       29 f0		      and	#$F0	; remove the ones digit by masking 4 bits 11110000
+    700  f368		       4a		      lsr		; shift right (it is now N/2)
+    701  f369		       4a		      lsr		; shift right (it is now N/4)
+    702  f36a		       85 9f		      sta	Temp	; save the value of A into Temp
+    703  f36c		       4a		      lsr		; shift right (it is now N/8)
+    704  f36d		       4a		      lsr		; shift right (it is now N/16)
+    705  f36e		       65 9f		      adc	Temp	; add the value saved in Temp (N/16+N/4)
+    706  f370		       95 9d		      sta	TensDigitOffset,X	; store A in TensDigitOffset+1 or TensDigitOffset
+    707  f372		       ca		      dex		; X--
+    708  f373		       10 e3		      bpl	.PrepareScoreLoop	; while X >= 0, loop to pass a second time
+    709  f375
+    710  f375		       a2 05		      ldx	#5
+    711  f377				   .SpriteLoop
+    712  f377
+    713  f377		       a4 9d		      ldy	TensDigitOffset
+    714  f379		       b9 f3 f3 	      lda	Digits,y
+    715  f37c		       29 f0		      and	#$F0
+    716  f37e		       85 9f		      sta	Temp
+    717  f380
+    718  f380		       a4 9b		      ldy	OnesDigitOffset
+    719  f382		       b9 f3 f3 	      lda	Digits,y
+    720  f385		       29 0f		      and	#$0F
+    721  f387		       05 9f		      ora	Temp
+    722  f389		       85 9f		      sta	Temp
+    723  f38b
+    724  f38b		       a5 9f		      lda	Temp
+    725  f38d		       95 a0		      sta	ScoreSprite,X
+    726  f38f
+    727  f38f		       a4 9e		      ldy	TensDigitOffset+1
+    728  f391		       b9 f3 f3 	      lda	Digits,y
+    729  f394		       29 f0		      and	#$F0
+    730  f396		       85 9f		      sta	Temp
+    731  f398
+    732  f398		       a4 9c		      ldy	OnesDigitOffset+1
+    733  f39a		       b9 f3 f3 	      lda	Digits,y
+    734  f39d		       29 0f		      and	#$0F
+    735  f39f		       05 9f		      ora	Temp
+    736  f3a1		       85 9f		      sta	Temp
+    737  f3a3
+    738  f3a3		       a5 9f		      lda	Temp
+    739  f3a5		       95 a6		      sta	TimerSprite,X
+    740  f3a7
+    741  f3a7		       e6 9d		      inc	TensDigitOffset
+    742  f3a9		       e6 9e		      inc	TensDigitOffset+1
+    743  f3ab		       e6 9b		      inc	OnesDigitOffset
+    744  f3ad		       e6 9c		      inc	OnesDigitOffset+1
+    745  f3af
+    746  f3af		       ca		      dex
+    747  f3b0		       d0 c5		      bne	.SpriteLoop
+    748  f3b2
+    749  f3b2		       60		      rts
+    750  f3b3
+    751  f3b3							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    752  f3b3							;; Lookup tabes
+    753  f3b3							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    754  f3b3
+    755  f3b3							; https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/
+    756  f3b3							; mode: asymmetric repeat line-height 4
+    757  f3b3				   LM_LogoPF0
+    758  f3b3		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$00,$00,$00,$90
+    759  f3bb		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$40,$00,$40
+    760  f3c3		       00 70		      .byte.b	$00,$70
+    761  f3c5				   LM_LogoPF1
+    762  f3c5		       00 40 00 40*	      .byte.b	$00,$40,$00,$40,$00,$00,$05,$DE
+    763  f3cd		       0a 42 0a 4e*	      .byte.b	$0A,$42,$0A,$4E,$08,$52,$08,$56
+    764  f3d5		       38 7b		      .byte.b	$38,$7B
+    765  f3d7				   LM_LogoPF2
+    766  f3d7		       00 00 00 00*	      .byte.b	$00,$00,$00,$00,$80,$00,$F8,$00
+    767  f3df		       a5 00 a5 00*	      .byte.b	$A5,$00,$A5,$00,$BF,$00,$85,$00
+    768  f3e7		       39 03		      .byte.b	$39,$03
+    769  f3e9
+    770  f3e9				   LM_LogoFade_Color
+    771  f3e9		       0e 3e 3c 3a*	      .byte.b	$0E,$3E,$3C,$3A,$38
+    772  f3ee
+    773  f3ee				   LM_LogoFade_BW
+    774  f3ee		       0e 0c 0a 08*	      .byte.b	$0E,$0C,$0A,$08,$06
+    775  f3f3
+    776  f3f3				   Digits
+    777  f3f3		       77		      .byte.b	%01110111	; ### ###
+    778  f3f4		       55		      .byte.b	%01010101	; # # # #
+    779  f3f5		       55		      .byte.b	%01010101	; # # # #
+    780  f3f6		       55		      .byte.b	%01010101	; # # # #
+    781  f3f7		       77		      .byte.b	%01110111	; ### ###
+    782  f3f8
+    783  f3f8		       11		      .byte.b	%00010001	;   #	 #
+    784  f3f9		       11		      .byte.b	%00010001	;   #	 #
+    785  f3fa		       11		      .byte.b	%00010001	;   #	 #
+    786  f3fb		       11		      .byte.b	%00010001	;   #	 #
+    787  f3fc		       11		      .byte.b	%00010001	;   #	 #
+    788  f3fd
+    789  f3fd		       77		      .byte.b	%01110111	; ### ###
+    790  f3fe		       11		      .byte.b	%00010001	;   #	 #
+    791  f3ff		       77		      .byte.b	%01110111	; ### ###
+    792  f400		       44		      .byte.b	%01000100	; #   #
+    793  f401		       77		      .byte.b	%01110111	; ### ###
+    794  f402
+    795  f402		       77		      .byte.b	%01110111	; ### ###
+    796  f403		       11		      .byte.b	%00010001	;   #	 #
+    797  f404		       33		      .byte.b	%00110011	;  ##	##
+    798  f405		       11		      .byte.b	%00010001	;   #	 #
+    799  f406		       77		      .byte.b	%01110111	; ### ###
+    800  f407
+    801  f407		       55		      .byte.b	%01010101	; # # # #
+    802  f408		       55		      .byte.b	%01010101	; # # # #
+    803  f409		       77		      .byte.b	%01110111	; ### ###
+    804  f40a		       11		      .byte.b	%00010001	;   #	 #
+    805  f40b		       11		      .byte.b	%00010001	;   #	 #
+    806  f40c
+    807  f40c		       77		      .byte.b	%01110111	; ### ###
+    808  f40d		       44		      .byte.b	%01000100	; #   #
+    809  f40e		       77		      .byte.b	%01110111	; ### ###
+    810  f40f		       11		      .byte.b	%00010001	;   #	 #
+    811  f410		       77		      .byte.b	%01110111	; ### ###
+    812  f411
+    813  f411		       77		      .byte.b	%01110111	; ### ###
+    814  f412		       44		      .byte.b	%01000100	; #   #
+    815  f413		       77		      .byte.b	%01110111	; ### ###
+    816  f414		       55		      .byte.b	%01010101	; # # # #
+    817  f415		       77		      .byte.b	%01110111	; ### ###
+    818  f416
+    819  f416		       77		      .byte.b	%01110111	; ### ###
+    820  f417		       11		      .byte.b	%00010001	;   #	 #
+    821  f418		       11		      .byte.b	%00010001	;   #	 #
+    822  f419		       11		      .byte.b	%00010001	;   #	 #
+    823  f41a		       11		      .byte.b	%00010001	;   #	 #
+    824  f41b
+    825  f41b		       77		      .byte.b	%01110111	; ### ###
+    826  f41c		       55		      .byte.b	%01010101	; # # # #
+    827  f41d		       77		      .byte.b	%01110111	; ### ###
+    828  f41e		       55		      .byte.b	%01010101	; # # # #
+    829  f41f		       77		      .byte.b	%01110111	; ### ###
+    830  f420
+    831  f420		       77		      .byte.b	%01110111	; ### ###
+    832  f421		       55		      .byte.b	%01010101	; # # # #
+    833  f422		       77		      .byte.b	%01110111	; ### ###
+    834  f423		       11		      .byte.b	%00010001	;   #	 #
+    835  f424		       77		      .byte.b	%01110111	; ### ###
+    836  f425
+    837  f425		       22		      .byte.b	%00100010	;  #	#
+    838  f426		       55		      .byte.b	%01010101	; # # # #
+    839  f427		       77		      .byte.b	%01110111	; ### ###
+    840  f428		       55		      .byte.b	%01010101	; # # # #
+    841  f429		       55		      .byte.b	%01010101	; # # # #
+    842  f42a
+    843  f42a		       77		      .byte.b	%01110111	; ### ###
+    844  f42b		       55		      .byte.b	%01010101	; # # # #
+    845  f42c		       66		      .byte.b	%01100110	; ##  ##
+    846  f42d		       55		      .byte.b	%01010101	; # # # #
+    847  f42e		       77		      .byte.b	%01110111	; ### ###
+    848  f42f
+    849  f42f		       77		      .byte.b	%01110111	; ### ###
+    850  f430		       44		      .byte.b	%01000100	; #   #
+    851  f431		       44		      .byte.b	%01000100	; #   #
+    852  f432		       44		      .byte.b	%01000100	; #   #
+    853  f433		       77		      .byte.b	%01110111	; ### ###
+    854  f434
+    855  f434		       66		      .byte.b	%01100110	; ##  ##
+    856  f435		       55		      .byte.b	%01010101	; # # # #
+    857  f436		       55		      .byte.b	%01010101	; # # # #
+    858  f437		       55		      .byte.b	%01010101	; # # # #
+    859  f438		       66		      .byte.b	%01100110	; ##  ##
+    860  f439
+    861  f439		       77		      .byte.b	%01110111	; ### ###
+    862  f43a		       44		      .byte.b	%01000100	; #   #
+    863  f43b		       77		      .byte.b	%01110111	; ### ###
+    864  f43c		       44		      .byte.b	%01000100	; #   #
+    865  f43d		       77		      .byte.b	%01110111	; ### ###
+    866  f43e
+    867  f43e		       77		      .byte.b	%01110111	; ### ###
+    868  f43f		       44		      .byte.b	%01000100	; #   #
+    869  f440		       66		      .byte.b	%01100110	; ##  ##
+    870  f441		       44		      .byte.b	%01000100	; #   #
+    871  f442		       44		      .byte.b	%01000100	; #   #
+    872  f443
+    873  f443							;---Graphics Data from PlayerPal 2600---
+    874  f443
+    875  f443				   GM_DRESS_IDLE
+    876  f443		       00		      .byte.b	#0
+    877  f444		       7e		      .byte.b	#%01111110	;$70
+    878  f445		       7e		      .byte.b	#%01111110	;$70
+    879  f446		       3c		      .byte.b	#%00111100	;$70
+    880  f447		       5a		      .byte.b	#%01011010	;$84
+    881  f448		       7e		      .byte.b	#%01111110	;$84
+    882  f449		       18		      .byte.b	#%00011000	;$F4
+    883  f44a		       3c		      .byte.b	#%00111100	;$00
+    884  f44b		       18		      .byte.b	#%00011000	;$00
+    885  f44c				   GM_DRESS_WALK1
+    886  f44c		       00		      .byte.b	#0
+    887  f44d		       78		      .byte.b	#%01111000	;$70
+    888  f44e		       7e		      .byte.b	#%01111110	;$70
+    889  f44f		       3c		      .byte.b	#%00111100	;$70
+    890  f450		       1a		      .byte.b	#%00011010	;$84
+    891  f451		       7e		      .byte.b	#%01111110	;$84
+    892  f452		       18		      .byte.b	#%00011000	;$F4
+    893  f453		       3c		      .byte.b	#%00111100	;$00
+    894  f454		       18		      .byte.b	#%00011000	;$00
+    895  f455				   GM_DRESS_WALK2
+    896  f455		       00		      .byte.b	#0
+    897  f456		       1e		      .byte.b	#%00011110	;$70
+    898  f457		       7e		      .byte.b	#%01111110	;$70
+    899  f458		       3c		      .byte.b	#%00111100	;$70
+    900  f459		       58		      .byte.b	#%01011000	;$84
+    901  f45a		       7e		      .byte.b	#%01111110	;$84
+    902  f45b		       18		      .byte.b	#%00011000	;$F4
+    903  f45c		       3c		      .byte.b	#%00111100	;$00
+    904  f45d		       18		      .byte.b	#%00011000	;$00
+    905  f45e				   GM_PANTS_IDLE
+    906  f45e		       00		      .byte.b	#0
+    907  f45f		       66		      .byte.b	#%01100110	;$70
+    908  f460		       24		      .byte.b	#%00100100	;$70
+    909  f461		       3c		      .byte.b	#%00111100	;$70
+    910  f462		       5a		      .byte.b	#%01011010	;$84
+    911  f463		       7e		      .byte.b	#%01111110	;$84
+    912  f464		       18		      .byte.b	#%00011000	;$F4
+    913  f465		       3c		      .byte.b	#%00111100	;$00
+    914  f466		       18		      .byte.b	#%00011000	;$00
+    915  f467				   GM_PANTS_WALK1
+    916  f467		       00		      .byte.b	#0
+    917  f468		       60		      .byte.b	#%01100000	;$70
+    918  f469		       26		      .byte.b	#%00100110	;$70
+    919  f46a		       3c		      .byte.b	#%00111100	;$70
+    920  f46b		       1a		      .byte.b	#%00011010	;$84
+    921  f46c		       7e		      .byte.b	#%01111110	;$84
+    922  f46d		       18		      .byte.b	#%00011000	;$F4
+    923  f46e		       3c		      .byte.b	#%00111100	;$00
+    924  f46f		       18		      .byte.b	#%00011000	;$00
+    925  f470				   GM_PANTS_WALK2
+    926  f470		       00		      .byte.b	#0
+    927  f471		       06		      .byte.b	#%00000110	;$70
+    928  f472		       64		      .byte.b	#%01100100	;$70
+    929  f473		       3c		      .byte.b	#%00111100	;$70
+    930  f474		       58		      .byte.b	#%01011000	;$84
+    931  f475		       7e		      .byte.b	#%01111110	;$84
+    932  f476		       18		      .byte.b	#%00011000	;$F4
+    933  f477		       3c		      .byte.b	#%00111100	;$00
+    934  f478		       18		      .byte.b	#%00011000	;$00
+    935  f479				   GM_BUG
+    936  f479		       00		      .byte.b	#0
+    937  f47a		       00		      .byte.b	#%00000000	;$00
+    938  f47b		       00		      .byte.b	#%00000000	;$00
+    939  f47c		       52		      .byte.b	#%01010010	;$F0
+    940  f47d		       3c		      .byte.b	#%00111100	;$F0
+    941  f47e		       3c		      .byte.b	#%00111100	;$F2
+    942  f47f		       52		      .byte.b	#%01010010	;$F0
+    943  f480		       00		      .byte.b	#%00000000	;$00
+    944  f481		       00		      .byte.b	#%00000000	;$00
+    945  f482				   GM_BIRD_1
+    946  f482		       00		      .byte.b	#0
+    947  f483		       00		      .byte.b	#%00000000	;$1C
+    948  f484		       01		      .byte.b	#%00000001	;$1C
+    949  f485		       3f		      .byte.b	#%00111111	;$0E
+    950  f486		       fe		      .byte.b	#%11111110	;$0A
+    951  f487		       18		      .byte.b	#%00011000	;$0E
+    952  f488		       76		      .byte.b	#%01110110	;$0E
+    953  f489		       00		      .byte.b	#%00000000	;$0E
+    954  f48a		       00		      .byte.b	#%00000000	;$0E
+    955  f48b				   GM_BIRD_2
+    956  f48b		       00		      .byte.b	#0
+    957  f48c		       00		      .byte.b	#%00000000	;$1C
+    958  f48d		       01		      .byte.b	#%00000001	;$1C
+    959  f48e		       3f		      .byte.b	#%00111111	;$0E
+    960  f48f		       fe		      .byte.b	#%11111110	;$0A
+    961  f490		       f8		      .byte.b	#%11111000	;$0E
+    962  f491		       00		      .byte.b	#%00000000	;$0E
+    963  f492		       00		      .byte.b	#%00000000	;$0E
+    964  f493		       00		      .byte.b	#%00000000	;$0E
+    965  f494
+    966  f494							;---End Graphics Data---
+    967  f494
+    968  f494
+    969  f494							;---Color Data from PlayerPal 2600---
+    970  f494				   GM_PLAYER_COLOR_IDLE
+    971  f494		       00		      .byte.b	#0
+    972  f495		       70		      .byte.b	#$70	;
+    973  f496		       70		      .byte.b	#$70	;
+    974  f497		       70		      .byte.b	#$70	;
+    975  f498		       84		      .byte.b	#$84	;
+    976  f499		       84		      .byte.b	#$84	;
+    977  f49a		       f4		      .byte.b	#$F4	;
+    978  f49b		       00		      .byte.b	#$00	;
+    979  f49c		       00		      .byte.b	#$00	;
+    980  f49d				   GM_PLAYER_COLOR_WALK1
+    981  f49d		       00		      .byte.b	#0
+    982  f49e		       70		      .byte.b	#$70	;
+    983  f49f		       70		      .byte.b	#$70	;
+    984  f4a0		       70		      .byte.b	#$70	;
+    985  f4a1		       84		      .byte.b	#$84	;
+    986  f4a2		       84		      .byte.b	#$84	;
+    987  f4a3		       f4		      .byte.b	#$F4	;
+    988  f4a4		       00		      .byte.b	#$00	;
+    989  f4a5		       00		      .byte.b	#$00	;
+    990  f4a6				   GM_PLAYER_COLOR_WALK2
+    991  f4a6		       00		      .byte.b	#0
+    992  f4a7		       70		      .byte.b	#$70	;
+    993  f4a8		       70		      .byte.b	#$70	;
+    994  f4a9		       70		      .byte.b	#$70	;
+    995  f4aa		       84		      .byte.b	#$84	;
+    996  f4ab		       84		      .byte.b	#$84	;
+    997  f4ac		       f4		      .byte.b	#$F4	;
+    998  f4ad		       00		      .byte.b	#$00	;
+    999  f4ae		       00		      .byte.b	#$00	;
+   1000  f4af				   GM_PLAYER_BW_IDLE
+   1001  f4af		       00		      .byte.b	#0
+   1002  f4b0		       00		      .byte.b	#$0	;
+   1003  f4b1		       00		      .byte.b	#$0	;
+   1004  f4b2		       00		      .byte.b	#$0	;
+   1005  f4b3		       02		      .byte.b	#$02	;
+   1006  f4b4		       02		      .byte.b	#$02	;
+   1007  f4b5		       04		      .byte.b	#$04	;
+   1008  f4b6		       00		      .byte.b	#$00	;
+   1009  f4b7		       00		      .byte.b	#$00	;
+   1010  f4b8				   GM_PLAYER_BW_WALK1
+   1011  f4b8		       00		      .byte.b	#0
+   1012  f4b9		       00		      .byte.b	#$0	;
+   1013  f4ba		       00		      .byte.b	#$0	;
+   1014  f4bb		       00		      .byte.b	#$0	;
+   1015  f4bc		       02		      .byte.b	#$02	;
+   1016  f4bd		       02		      .byte.b	#$02	;
+   1017  f4be		       04		      .byte.b	#$04	;
+   1018  f4bf		       00		      .byte.b	#$00	;
+   1019  f4c0		       00		      .byte.b	#$00	;
+   1020  f4c1				   GM_PLAYER_BW_WALK2
+   1021  f4c1		       00		      .byte.b	#0
+   1022  f4c2		       00		      .byte.b	#$0	;
+   1023  f4c3		       00		      .byte.b	#$0	;
+   1024  f4c4		       00		      .byte.b	#$0	;
+   1025  f4c5		       02		      .byte.b	#$02	;
+   1026  f4c6		       02		      .byte.b	#$02	;
+   1027  f4c7		       04		      .byte.b	#$04	;
+   1028  f4c8		       00		      .byte.b	#$00	;
+   1029  f4c9		       00		      .byte.b	#$00	;
+   1030  f4ca				   GM_BUG_COLOR
+   1031  f4ca		       00		      .byte.b	#0
+   1032  f4cb		       00		      .byte.b	#$00	;
+   1033  f4cc		       00		      .byte.b	#$00	;
+   1034  f4cd		       f0		      .byte.b	#$F0	;
+   1035  f4ce		       f0		      .byte.b	#$F0	;
+   1036  f4cf		       f2		      .byte.b	#$F2	;
+   1037  f4d0		       f0		      .byte.b	#$F0	;
+   1038  f4d1		       00		      .byte.b	#$00	;
+   1039  f4d2		       00		      .byte.b	#$00	;
+   1040  f4d3				   GM_BUG_BW
+   1041  f4d3		       00		      .byte.b	#0
+   1042  f4d4		       00		      .byte.b	#$00	;
+   1043  f4d5		       00		      .byte.b	#$00	;
+   1044  f4d6		       00		      .byte.b	#$00	;
+   1045  f4d7		       00		      .byte.b	#$00	;
+   1046  f4d8		       02		      .byte.b	#$02	;
+   1047  f4d9		       00		      .byte.b	#$00	;
+   1048  f4da		       00		      .byte.b	#$00	;
+   1049  f4db		       00		      .byte.b	#$00	;
+   1050  f4dc				   GM_BIRD_COLOR
+   1051  f4dc		       00		      .byte.b	#0
+   1052  f4dd		       1c		      .byte.b	#$1C	;
+   1053  f4de		       1c		      .byte.b	#$1C	;
+   1054  f4df		       0e		      .byte.b	#$0E	;
+   1055  f4e0		       0a		      .byte.b	#$0A	;
+   1056  f4e1		       0e		      .byte.b	#$0E	;
+   1057  f4e2		       0e		      .byte.b	#$0E	;
+   1058  f4e3		       0e		      .byte.b	#$0E	;
+   1059  f4e4		       0e		      .byte.b	#$0E	;
+   1060  f4e5				   GM_BIRD_BW
+   1061  f4e5		       00		      .byte.b	#0
+   1062  f4e6		       0c		      .byte.b	#$0C	;
+   1063  f4e7		       0c		      .byte.b	#$0C	;
+   1064  f4e8		       0e		      .byte.b	#$0E	;
+   1065  f4e9		       0a		      .byte.b	#$0A	;
+   1066  f4ea		       0e		      .byte.b	#$0E	;
+   1067  f4eb		       0e		      .byte.b	#$0E	;
+   1068  f4ec		       0e		      .byte.b	#$0E	;
+   1069  f4ed		       0e		      .byte.b	#$0E	;
+   1070  f4ee
+   1071  f4ee							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   1072  f4ee							;; Fill the 4K ROM
+   1073  f4ee							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   1074  fffc					      org	$FFFC	; insert two pointers at the end of ROM
+   1075  fffc		       00 f0		      .word.w	Reset	; reset vector
+   1076  fffe		       00 f0		      .word.w	Reset	; interrupt Vector
+   1077  10000
+   1078  10000

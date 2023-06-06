@@ -38,7 +38,10 @@ GAME_PF_COLOR = $C0             ; game playfield color - color mode
 GAME_PF_BW = $02                ; game playfield color - black & white
 GAME_SKY_COLOR = $78            ; game sky color - color mode
 GAME_SKY_BW = $04               ; game sky color - black & white
+
 GAME_SCOREBACK_COLOR = $0       ; game score board color - all modes
+GAME_GAMEOVER_COLOR = $20       ; game over color - color mode
+GAME_GAMEOVER_BW = $02          ; game over color - black & white
 
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
@@ -46,6 +49,8 @@ GAME_BUG_HEIGHT = 9             ; bug sprite height
 GAME_BIRD_HEIGHT = 9            ; bird sprite height
 
 GAME_DIGIT_HEIGHT = 5           ; digit height
+
+GAME_MAX_TIME = %00010000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RAM variables located outside ROM at address $0080
@@ -78,14 +83,15 @@ GM_PlayfieldIdx     ds 1
 PFCounter           ds 1
 Random              ds 1
 
+GameOver            ds 1
 Score               ds 1        ; stored as BCD
 Timer               ds 1        ; stored as BCD
 TimerTick           ds 1
 OnesDigitOffset     ds 2
 TensDigitOffset     ds 2
 Temp                ds 1
-ScoreSprite         ds 5
-TimerSprite         ds 5
+ScoreSprite         ds 6
+TimerSprite         ds 6
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program start - Located at top of ROM at address $F000
@@ -126,8 +132,13 @@ Reset:
     lda #0
     sta GM_BirdReflection
 
-    lda #60
+    lda #1
     sta TimerTick
+    lda #GAME_MAX_TIME
+    sta Timer
+    
+    lda #1
+    sta GameOver
 
     lda #2
     sta VBLANK                  ; turn on VBLANK 
@@ -291,17 +302,28 @@ GM_NextFrame:
     ; -------------------------
     sta HMOVE                   ; apply positions offset
 
+.GM_HandleTimer
+    lda GameOver
+    bne .GM_HandleTimerDone 
+
     dec TimerTick
-    bne .GM_SecondNotDone    
-    sed
-    lda Timer
-    clc
-    adc #1
-    sta Timer
-    cld    
+    bne .GM_HandleTimerDone    
+
     lda #60
     sta TimerTick
-.GM_SecondNotDone
+
+    sed
+    lda Timer
+    sec 
+    sbc #1
+    sta Timer
+    cld    
+
+    lda Timer
+    bne .GM_HandleTimerDone 
+    lda #1
+    sta GameOver
+.GM_HandleTimerDone
 
 .GM_SetColor:                   ; set correct colors
     lda SWCHB
@@ -317,6 +339,18 @@ GM_NextFrame:
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
     SET_POINTER GM_BirdColorPtr, GM_BIRD_COLOR
+
+.GM_SetCoreboardColorCM:
+    lda Timer
+    beq .GM_GameOverCM
+    lda #GAME_SCOREBACK_COLOR
+    sta COLUBK
+    jmp .GM_SetScoreboardColorCMDone
+.GM_GameOverCM:
+    lda #GAME_GAMEOVER_COLOR
+    sta COLUBK
+.GM_SetScoreboardColorCMDone:
+
     jmp .GM_SetColorDone
 .GM_BWMode:
     lda #GAME_SKY_BW
@@ -328,9 +362,19 @@ GM_NextFrame:
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_BW
     SET_POINTER GM_BirdColorPtr, GM_BIRD_BW
-.GM_SetColorDone:
+
+.GM_SetCoreboardColorBW:
+    lda Timer
+    beq .GM_GameOverBW
     lda #GAME_SCOREBACK_COLOR
     sta COLUBK
+    jmp .GM_SetScoreboardColorBWDone
+.GM_GameOverBW:
+    lda #GAME_GAMEOVER_BW
+    sta COLUBK
+.GM_SetScoreboardColorBWDone:
+
+.GM_SetColorDone:
 
 .GM_SetGraphics
     lda SWCHB
@@ -375,8 +419,6 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Score Board - 20 scanlines - 1520 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    lda #$00
-    sta COLUBK
     lda #$0E
     sta COLUPF
     
@@ -519,16 +561,20 @@ GM_NextFrame:
     jmp Reset                   ; jump to reset if reset button has been pressed
 .GM_NoReset:
 
+    ldx #0
+
 .GM_CheckInputUp:
     lda #%00010000
     bit SWCHA
     bne .GM_CheckInputDown
+    ldx #1
     inc GM_PlayerYPos
 
 .GM_CheckInputDown:
     lda #%00100000
     bit SWCHA
     bne .GM_CheckInputLeft
+    ldx #1
     dec GM_PlayerYPos
 
 .GM_CheckInputLeft:
@@ -537,6 +583,7 @@ GM_NextFrame:
     bne .GM_CheckInputRight
     lda #%00001000
     sta GM_BirdReflection
+    ldx #1
     dec GM_PlayerXPos
 
 .GM_CheckInputRight:
@@ -545,9 +592,18 @@ GM_NextFrame:
     bne .GM_CheckInputDone
     lda #0
     sta GM_BirdReflection
+    ldx #1
     inc GM_PlayerXPos
 
 .GM_CheckInputDone:
+
+    cpx #1
+    bne .GM_Continue
+    lda Timer
+    beq .GM_Continue
+    lda #0 
+    sta GameOver
+.GM_Continue
 
 .GM_OverscanWait:
     ldx INTIM
