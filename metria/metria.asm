@@ -63,6 +63,7 @@ LM_LogoFadeState    ds 1        ; current logo fade state
 LM_LogoFadeDelay    ds 1        ; current logo fade delay
 
 GM_BackgroundColor  ds 1
+GM_TreeColor        ds 1
 GM_SkyColor         ds 1
 
 GM_PlayerPtr        ds 2
@@ -290,6 +291,25 @@ GM_NextFrame:
     lda #TIMER_VBLANK
     sta TIM64T                  ; set timer to 43x64 = 2752 mc
 
+
+.GM_CheckCollisions:
+
+.GM_CheckColP0ToP1:
+    lda CXPPMM
+    and #%10000000
+    beq .GM_CheckColP0ToP1Done
+    sed
+    lda Score
+    clc
+    adc #1
+    sta Score
+    cld
+    jsr PlaceBug
+.GM_CheckColP0ToP1Done:
+
+.GM_CheckCollisionsDone:
+    sta CXCLR
+
     lda GM_PlayerXPos           ; load player x pos
     ldy #0                      ; set Y = 0 for player 0
     jsr SetObjectXPos           ; call subroutine to set object x pos 
@@ -335,7 +355,7 @@ GM_NextFrame:
     lda #GAME_BK_COLOR        
     sta GM_BackgroundColor
     lda #GAME_PF_COLOR
-    sta COLUPF
+    sta GM_TreeColor
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
     SET_POINTER GM_BirdColorPtr, GM_BIRD_COLOR
@@ -358,7 +378,7 @@ GM_NextFrame:
     lda #GAME_BK_BW
     sta GM_BackgroundColor
     lda #GAME_PF_BW
-    sta COLUPF
+    sta GM_TreeColor
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
     SET_POINTER GM_BugColorPtr, GM_BUG_BW
     SET_POINTER GM_BirdColorPtr, GM_BIRD_BW
@@ -386,22 +406,6 @@ GM_NextFrame:
 .GM_SetDress:
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
 .GM_SetGraphicsDone:
-
-.GM_CheckCollisions:
-    lda CXPPMM
-    and #%10000000
-    beq .GM_CheckCollisionsDone
-
-    sed
-    lda Score
-    clc
-    adc #1
-    sta Score
-    cld
-    
-    jsr PlaceBug
-.GM_CheckCollisionsDone:
-    sta CXCLR
 
 .GM_PlayfieldInit
     lda #71                     
@@ -465,7 +469,7 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda GM_SkyColor
     sta COLUBK
-    ldx #15
+    ldx #14
     lda #0
     sta VDELP0                  ; clear vertical delay för player 0
 
@@ -499,12 +503,19 @@ GM_NextFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Playfield - 152 scanlines - 11552 mc
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    lda GM_BackgroundColor
-    sta COLUBK
+
     lda #1
     sta VDELP0                  ; set vertical delay för player 0
     lda #0
     sta REFP0
+    sta WSYNC
+    lda GM_TreeColor
+    sta COLUPF
+    lda #%00000101
+    sta CTRLPF                  ; enable playfield reflection
+    sta WSYNC
+    lda GM_BackgroundColor
+    sta COLUBK
 
 .GM_PlayfieldLoop:
 
@@ -540,11 +551,25 @@ GM_NextFrame:
     lda (GM_BugColorPtr),Y      ; load player color from lookup table
     sta COLUP1                  ; set color for player 1 slice
 .GM_DrawBugDone:
+
+.GM_DrawTree:
+    lda PFCounter               ; A = current scanline in playfield
+    sec                         ; make sure carry flag is set
+    sbc #28                     ; subtract sprite Y coordinate
+    cmp #20                      ; are we inside the sprite height bounds?
+    bcc .GM_WriteTree         ; if result < height then A contains the index
+    lda #0                      ; else, set A to 0
+.GM_WriteTree 
+    tay
+    lda GM_TREE,y
+    sta PF2
+.GM_DrawTreeDone:
+
     sta WSYNC
     ; -------------------------  
+
     dec PFCounter
     bne .GM_PlayfieldLoop       ; repeat next scanline until finished
-    sta WSYNC
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Overscan - 30 scanlines - 2280 mc
@@ -562,7 +587,6 @@ GM_NextFrame:
 .GM_NoReset:
 
     ldx #0
-
 .GM_CheckInputUp:
     lda #%00010000
     bit SWCHA
@@ -966,6 +990,11 @@ GM_BIRD_2:
 ;---End Graphics Data---
 
 
+GM_TREE:
+    .byte $00,$80,$80,$80
+	.byte $80,$80,$80,$80,$D0,$F8,$F8,$F8
+	.byte $F8,$F0,$F0,$F0,$E0,$C0,$C0,$80
+
 ;---Color Data from PlayerPal 2600---
 GM_PLAYER_COLOR_IDLE:
     .byte #0
@@ -1067,6 +1096,7 @@ GM_BIRD_BW:
     .byte #$0E;
     .byte #$0E;
     .byte #$0E;
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Fill the 4K ROM
