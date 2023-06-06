@@ -14,6 +14,20 @@
         bne .WaitX          ; Loop until X = 0
     ENDM
 
+    MAC FIRE_MISSILE
+        lda GM_MissileActive
+        bne .NoMissile
+        lda GM_PlayerXPos
+        clc
+        adc #5
+        sta GM_MissileXPos
+        lda #70
+        sta GM_MissileYPos
+        lda #2
+        sta GM_MissileActive
+.NoMissile
+    ENDM
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Contants
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -46,11 +60,13 @@ GAME_GAMEOVER_BW = $02          ; game over color - black & white
 GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
 
-GAME_BIRD_HEIGHT = 9            ; bird sprite height
+GAME_BIRD_HEIGHT = 6            ; bird sprite height
+GAME_BIRD_TICK_LEN = 10         ; bird anim speed
+GAME_BIRD_YPOS_TBL_LEN = 12      ; bird anim table length
 
 GAME_DIGIT_HEIGHT = 5           ; digit height
 
-GAME_MAX_TIME = %00010000
+GAME_MAX_TIME = %01100000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RAM variables located outside ROM at address $0080
@@ -75,6 +91,13 @@ GM_BirdPtr          ds 2
 GM_BirdColorPtr     ds 2
 GM_BirdYPos         ds 1
 GM_BirdReflection   ds 1
+
+GM_BirdTick         ds 1
+GM_BirdYPosIdx      ds 1
+
+GM_MissileXPos      ds 1
+GM_MissileYPos      ds 1
+GM_MissileActive    ds 1
 
 GM_BugColorPtr      ds 2
 GM_BugXPos          ds 1
@@ -128,10 +151,13 @@ Reset:
     lda #21
     sta GM_PlayerYPos
 
-    lda #4
+    lda #0
     sta GM_BirdYPos
     lda #0
     sta GM_BirdReflection
+    sta GM_MissileActive
+    lda #GAME_BIRD_TICK_LEN
+    sta GM_BirdTick
 
     lda #1
     sta TimerTick
@@ -307,6 +333,26 @@ GM_NextFrame:
     jsr PlaceBug
 .GM_CheckColP0ToP1Done:
 
+.GM_CheckColM1ToP0:
+    lda CXM1P
+    and #%10000000
+    beq .GM_CheckColM1ToP0Done
+    lda #0
+    sta Score
+    lda #0
+    sta GM_MissileActive
+.GM_CheckColM1ToP0Done:
+
+
+.GM_CheckColM1ToPF:
+    lda CXM1FB
+    and #%10000000
+    beq .GM_CheckColM1ToPFDone
+    lda #0
+    sta GM_MissileActive
+.GM_CheckColM1ToPFDone:
+
+
 .GM_CheckCollisionsDone:
     sta CXCLR
 
@@ -316,6 +362,10 @@ GM_NextFrame:
 
     lda GM_BugXPos              ; load bug x pos
     ldy #1                      ; set Y = 1 for player 1
+    jsr SetObjectXPos           ; call subroutine to set object x pos
+
+    lda GM_MissileXPos          ; load bug x pos
+    ldy #3                      ; set Y = 2 for missile 0
     jsr SetObjectXPos           ; call subroutine to set object x pos
 
     sta WSYNC                   ; geta fresh scanline 
@@ -482,7 +532,7 @@ GM_NextFrame:
     txa                         ; transfer X to A
     sec                         ; make sure carry flag is set
     sbc GM_BirdYPos             ; subtract sprite Y coordinate
-    cmp GAME_PLAYER_HEIGHT      ; are we inside the sprite height bounds?
+    cmp GAME_BIRD_HEIGHT      ; are we inside the sprite height bounds?
     bcc .GM_WriteBird           ; if result < SpriteHeight, call subroutine
     lda #0                      ; else, set index to 0
 .GM_WriteBird:
@@ -511,16 +561,30 @@ GM_NextFrame:
     sta WSYNC
     lda GM_TreeColor
     sta COLUPF
+    lda #$00      ; load player color from lookup table
+    sta COLUP1                  ; set color for player 1 slice
     lda #%00000101
     sta CTRLPF                  ; enable playfield reflection
     sta WSYNC
     lda GM_BackgroundColor
     sta COLUBK
 
+    ldx #71
 .GM_PlayfieldLoop:
+    ; ldx PFCounter               ; A = current scanline in playfield
+
+.GM_DrawMissile:
+    txa
+    ldy #0                ; start accumualtor with 0 (null position)
+    cmp GM_MissileYPos       ; compare X/scanline with missile y-position
+    bne .GM_DrawMissileDone  ; if is not equal, skip the draw of missile0
+    ldy GM_MissileActive        ; and set ENABL second bit to enable missile
+.GM_DrawMissileDone
+    sty ENAM1             ; store correct value in the TIA missile register
+
 
 .GM_DrawPlayer:
-    lda PFCounter               ; A = current scanline in playfield
+    txa
     sec                         ; make sure carry flag is set
     sbc GM_PlayerYPos           ; subtract sprite Y coordinate
     cmp GAME_PLAYER_HEIGHT      ; are we inside the sprite height bounds?
@@ -531,11 +595,11 @@ GM_NextFrame:
     lda (GM_PlayerPtr),Y        ; load player bitmap slice of data
     sta GRP0                    ; set graphics for player 0 slice - delayed
     lda (GM_PlayerColorPtr),Y   ; load player color from lookup table
-    tax
+    sta Temp
 .GM_DrawPlayerDone:
 
 .GM_DrawBug:
-    lda PFCounter               ; transfer X to A
+    txa               ; transfer X to A
     sec                         ; make sure carry flag is set
     sbc GM_BugYPos              ; subtract sprite Y coordinate
     cmp GAME_PLAYER_HEIGHT      ; are we inside the sprite height bounds?
@@ -547,13 +611,12 @@ GM_NextFrame:
     sta WSYNC                   ; wait for next scanline
     ; ------------------------- 
     sta GRP1                    ; set graphics for player 1 + 0 slice
-    stx COLUP0                  ; set color for player 0 slice
-    lda (GM_BugColorPtr),Y      ; load player color from lookup table
-    sta COLUP1                  ; set color for player 1 slice
+    lda Temp
+    sta COLUP0                  ; set color for player 0 slice
 .GM_DrawBugDone:
 
 .GM_DrawTree:
-    lda PFCounter               ; A = current scanline in playfield
+    txa               ; A = current scanline in playfield
     sec                         ; make sure carry flag is set
     sbc #28                     ; subtract sprite Y coordinate
     cmp #20                      ; are we inside the sprite height bounds?
@@ -568,7 +631,7 @@ GM_NextFrame:
     sta WSYNC
     ; -------------------------  
 
-    dec PFCounter
+    dex
     bne .GM_PlayfieldLoop       ; repeat next scanline until finished
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -585,6 +648,41 @@ GM_NextFrame:
     bne .GM_NoReset
     jmp Reset                   ; jump to reset if reset button has been pressed
 .GM_NoReset:
+
+    lda GameOver
+    beq .GM_NotGameOver
+    lda Timer
+    bne .GM_NotGameOver
+    jmp .GM_Continue
+.GM_NotGameOver
+
+    dec GM_BirdTick
+    bne .GM_BirdAnimDone
+    lda #GAME_BIRD_TICK_LEN
+    sta GM_BirdTick
+    inc GM_BirdYPosIdx
+    lda GM_BirdYPosIdx
+    cmp #GAME_BIRD_YPOS_TBL_LEN
+    bne .GM_BirdAnimSet
+    FIRE_MISSILE
+    lda #0
+    sta GM_BirdYPosIdx
+.GM_BirdAnimSet:
+    tay 
+    lda GM_BIRD_ANIM,Y
+    sta GM_BirdYPos
+.GM_BirdAnimDone:
+
+    lda #2
+    cmp GM_MissileYPos
+    beq .GM_StopMisssile
+    dec GM_MissileYPos       ; else, increase y-position of the bullet/ball
+    dec GM_MissileYPos       ; else, increase y-position of the bullet/ball
+    jmp .GM_MissileDone
+.GM_StopMisssile:
+    lda #0
+    sta GM_MissileActive    
+.GM_MissileDone:
 
     ldx #0
 .GM_CheckInputUp:
@@ -775,6 +873,9 @@ PrepareScoreAndTimer subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup tabes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+GM_BIRD_ANIM:
+    .byte #2,#5,#7,#8,#8,#8,#8,#8,#7,#5,#2,#1
 
 ; https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/
 ; mode: asymmetric repeat line-height 4
@@ -968,23 +1069,17 @@ GM_BUG:
     .byte #%00000000;$00      
 GM_BIRD_1:
     .byte #0
-    .byte #%00000000;$1C
     .byte #%00000001;$1C
     .byte #%00111111;$0E
     .byte #%11111110;$0A
     .byte #%00011000;$0E
     .byte #%01110110;$0E
-    .byte #%00000000;$0E
-    .byte #%00000000;$0E
 GM_BIRD_2:
     .byte #0
-    .byte #%00000000;$1C
     .byte #%00000001;$1C
     .byte #%00111111;$0E
     .byte #%11111110;$0A
     .byte #%11111000;$0E
-    .byte #%00000000;$0E
-    .byte #%00000000;$0E
     .byte #%00000000;$0E
 
 ;---End Graphics Data---
@@ -1079,21 +1174,15 @@ GM_BUG_BW:
 GM_BIRD_COLOR:
     .byte #0
     .byte #$1C;
-    .byte #$1C;
     .byte #$0E;
     .byte #$0A;
-    .byte #$0E;
-    .byte #$0E;
     .byte #$0E;
     .byte #$0E;
 GM_BIRD_BW:
     .byte #0
     .byte #$0C;
-    .byte #$0C;
     .byte #$0E;
     .byte #$0A;
-    .byte #$0E;
-    .byte #$0E;
     .byte #$0E;
     .byte #$0E;
 
