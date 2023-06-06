@@ -294,8 +294,8 @@ GM_NextFrame:
     dec TimerTick
     bne .GM_SecondNotDone    
     sed
-    clc
     lda Timer
+    clc
     adc #1
     sta Timer
     cld    
