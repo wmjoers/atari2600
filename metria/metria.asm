@@ -359,8 +359,19 @@ GM_NextFrame:
     lda CXM1P
     and #%10000000
     beq .GM_CheckColM1ToP0Done
+
+
+    sed
+    lda Score
+    sec
+    sbc #5
+    bpl .GM_ScoreSubOk
     lda #0
     sta Score
+.GM_ScoreSubOk:     
+    sta Score
+    cld
+
     lda #0
     sta GM_MissileActive
     ldy #sfxGAMEOVER  
