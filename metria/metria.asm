@@ -1,6 +1,6 @@
     processor 6502
 
-    include "vcs.h"
+    include "vcs.h"         
     include "macro.h"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -37,15 +37,15 @@
 BW_MASK = %00001000             ; bitmask for black & white switch
 RESET_MASK = %00000001          ; bitmask for reset switch
 LEFT_BTN_MASK = %10000000       ; bitmask for left joystick button
-TIMER_VBLANK = 43               ; value for TIM64T vertical blank timer
-TIMER_OVERSCAN = 35             ; value for TIM64T overscan timer
+TIMER_VBLANK = 43               ; mc value for TIM64T vertical blank timer
+TIMER_OVERSCAN = 35             ; mc value for TIM64T overscan timer
 
-RANDOM_SEED = $72
+RANDOM_SEED = $72               ; initial value for random generator
 
 LOGO_BK_COLOR = $38             ; logo mode background color - color mode
 LOGO_BK_BW = $06                ; logo mode background color - black & white
-LOGO_FADE_INIT_STATE = 4        ; initial value for the logo fade in state
-LOGO_FADE_INIT_DELAY = 40       ; initial delay value before logo fades in
+LOGO_FADE_INIT_STATE = 4        ; initial value for the logo fade-in state
+LOGO_FADE_INIT_DELAY = 40       ; initial delay value before logo fades-in
 LOGO_FADE_DELAY = 20            ; delay for each fade step - 20 frames/step
 
 GAME_BK_COLOR = $C8             ; game background color - color mode
@@ -63,18 +63,20 @@ GAME_PLAYER_HEIGHT = 9          ; player sprite height
 GAME_BUG_HEIGHT = 9             ; bug sprite height
 
 GAME_PLAYER_MIN_X = 0           ; player minimun x
-GAME_PLAYER_MAX_X = 146           ; player minimun x
+GAME_PLAYER_MAX_X = 146         ; player minimun x
 GAME_PLAYER_MIN_Y = 2           ; player minimun x
-GAME_PLAYER_MAX_Y = 62           ; player minimun x
-GAME_PLAYER_ANIM_SPEED = 10
+GAME_PLAYER_MAX_Y = 62          ; player minimun x
+GAME_PLAYER_ANIM_SPEED = 10     ; player animation speed
+
+GAME_BUG_COLOR = 0              ; bug and missile/poop color - all modes
 
 GAME_BIRD_HEIGHT = 6            ; bird sprite height
 GAME_BIRD_TICK_LEN = 10         ; bird anim speed
-GAME_BIRD_YPOS_TBL_LEN = 12      ; bird anim table length
+GAME_BIRD_YPOS_TBL_LEN = 12     ; bird anim table length
 
-GAME_DIGIT_HEIGHT = 5           ; digit height
+GAME_DIGIT_HEIGHT = 5           ; digit height for score and timer
 
-GAME_MAX_TIME = %01100000
+GAME_MAX_TIME = %01100000       ; initial game time in BCD - 60
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RAM variables located outside ROM at address $0080
@@ -86,50 +88,47 @@ GAME_MAX_TIME = %01100000
 LM_LogoFadeState    ds 1        ; current logo fade state
 LM_LogoFadeDelay    ds 1        ; current logo fade delay
 
-GM_BackgroundColor  ds 1
-GM_TreeColor        ds 1
-GM_SkyColor         ds 1
+GM_BackgroundColor  ds 1        ; current background color       
+GM_PFColor          ds 1        ; current playfield color
+GM_SkyColor         ds 1        ; current sky color
 
-GM_PlayerPtr        ds 2
-GM_PlayerColorPtr   ds 2
-GM_PlayerXPos       ds 1
-GM_PlayerYPos       ds 1
-GM_PlayerAnimOn     ds 1
-GM_PlayerAnimFrame  ds 1
-GM_PlayerAnimTicks  ds 1
+GM_PlayerPtr        ds 2        ; pointer to active player sprite
+GM_PlayerColorPtr   ds 2        ; pointer to active player sprite color table
+GM_PlayerXPos       ds 1        ; players x position
+GM_PlayerYPos       ds 1        ; players y position
+GM_PlayerAnimOn     ds 1        ; flag to indicate if animation is active
+GM_PlayerAnimFrame  ds 1        ; current player animation frame
+GM_PlayerAnimTicks  ds 1        ; timer for player animation
 
-GM_BirdPtr          ds 2
-GM_BirdColorPtr     ds 2
-GM_BirdYPos         ds 1
-GM_BirdReflection   ds 1
+GM_BirdPtr          ds 2        ; pointer to active bird sprite
+GM_BirdColorPtr     ds 2        ; pointer to active bird sprite color table
+GM_BirdYPos         ds 1        ; bird y position (x position is same as player)
+GM_BirdReflection   ds 1        ; bird direction
+GM_BirdTick         ds 1        ; bird timer
+GM_BirdYPosIdx      ds 1        ; index in bird y position table
 
-GM_BirdTick         ds 1
-GM_BirdYPosIdx      ds 1
+GM_MissileXPos      ds 1        ; missile/poop x position
+GM_MissileYPos      ds 1        ; missile/poop y position
+GM_MissileActive    ds 1        ; flag to indicate if missile is active on screen
 
-GM_MissileXPos      ds 1
-GM_MissileYPos      ds 1
-GM_MissileActive    ds 1
+GM_BugColor         ds 1        ; bug and missile/poop color - all modes
+GM_BugXPos          ds 1        ; bug x position
+GM_BugYPos          ds 1        ; bug y position
 
-GM_BugColorPtr      ds 2
-GM_BugXPos          ds 1
-GM_BugYPos          ds 1
-GM_PlayfieldIdx     ds 1
+Random              ds 1        ; random value
 
-PFCounter           ds 1
-Random              ds 1
+GameOver            ds 1        ; flag to indicate if game is over.
+Score               ds 1        ; current score stored as BCD
+Timer               ds 1        ; current timer stored as BCD
+TimerTick           ds 1        ; timer timer
+OnesDigitOffset     ds 2        ; pointers to current score and timer ones digits
+TensDigitOffset     ds 2        ; pointers to current score and timer tens digits
+Temp                ds 1        ; general temporary variable 
+ScoreSprite         ds 6        ; current score sprite
+TimerSprite         ds 6        ; current timer sprite
 
-GameOver            ds 1
-Score               ds 1        ; stored as BCD
-Timer               ds 1        ; stored as BCD
-TimerTick           ds 1
-OnesDigitOffset     ds 2
-TensDigitOffset     ds 2
-Temp                ds 1
-ScoreSprite         ds 6
-TimerSprite         ds 6
-
-SFX_LEFT            ds 1   
-SFX_RIGHT           ds 1    
+SFX_LEFT            ds 1        ; required variable for SFX-soundlib
+SFX_RIGHT           ds 1        ; required variable for SFX-soundlib
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program start - Located at top of ROM at address $F000
@@ -155,8 +154,6 @@ Reset:
 
     SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
-
-    SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
 
     SET_POINTER GM_BirdPtr, GM_BIRD_1
 
@@ -443,9 +440,8 @@ GM_NextFrame:
     lda #GAME_BK_COLOR        
     sta GM_BackgroundColor
     lda #GAME_PF_COLOR
-    sta GM_TreeColor
+    sta GM_PFColor
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
-    SET_POINTER GM_BugColorPtr, GM_BUG_COLOR
     SET_POINTER GM_BirdColorPtr, GM_BIRD_COLOR
 
 .GM_SetCoreboardColorCM:
@@ -466,9 +462,8 @@ GM_NextFrame:
     lda #GAME_BK_BW
     sta GM_BackgroundColor
     lda #GAME_PF_BW
-    sta GM_TreeColor
+    sta GM_PFColor
     SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
-    SET_POINTER GM_BugColorPtr, GM_BUG_BW
     SET_POINTER GM_BirdColorPtr, GM_BIRD_BW
 
 .GM_SetCoreboardColorBW:
@@ -516,9 +511,6 @@ GM_NextFrame:
     jmp .GM_SetGraphicsDone
 .GM_SetGraphicsDone:
 
-.GM_PlayfieldInit
-    lda #71                     
-    sta PFCounter               ; 144/2 scanelines
     jsr PrepareScoreAndTimer
 
 .GM_VBLankWait:
@@ -618,9 +610,9 @@ GM_NextFrame:
     lda #0
     sta REFP0
     sta WSYNC
-    lda GM_TreeColor
+    lda GM_PFColor
     sta COLUPF
-    lda #$00      ; load player color from lookup table
+    lda #GAME_BUG_COLOR      ; load player color from lookup table
     sta COLUP1                  ; set color for player 1 slice
     lda #%00000001
     sta CTRLPF                  ; enable playfield reflection
@@ -630,7 +622,6 @@ GM_NextFrame:
 
     ldx #71
 .GM_PlayfieldLoop:
-    ; ldx PFCounter               ; A = current scanline in playfield
 
 .GM_DrawMissile:
     txa
