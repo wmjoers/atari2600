@@ -51,7 +51,7 @@ LOGO_FADE_DELAY = 20            ; delay for each fade step - 20 frames/step
 GAME_BK_COLOR = $C8             ; game background color - color mode
 GAME_BK_BW = $08                ; game background color - black & white
 GAME_PF_COLOR = $C0             ; game playfield color - color mode
-GAME_PF_BW = $04                ; game playfield color - black & white
+GAME_PF_BW = $02                ; game playfield color - black & white
 GAME_SKY_COLOR = $78            ; game sky color - color mode
 GAME_SKY_BW = $04               ; game sky color - black & white
 
@@ -123,7 +123,7 @@ Timer               ds 1        ; current timer stored as BCD
 TimerTick           ds 1        ; timer timer
 OnesDigitOffset     ds 2        ; pointers to current score and timer ones digits
 TensDigitOffset     ds 2        ; pointers to current score and timer tens digits
-Temp                ds 1        ; general temporary variable 
+Temp                ds 1       ; general temporary variable 
 ScoreSprite         ds 6        ; current score sprite
 TimerSprite         ds 6        ; current timer sprite
 
@@ -152,8 +152,8 @@ Reset:
     lda #LOGO_FADE_INIT_DELAY
     sta LM_LogoFadeDelay        ; initialize logo fade delay
 
-    SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
-    SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
+    SET_POINTER GM_PlayerPtr, GM_PLAYER1_IDLE
+    SET_POINTER GM_PlayerColorPtr, GM_PLAYER1_COLOR
 
     SET_POINTER GM_BirdPtr, GM_BIRD_1
 
@@ -434,6 +434,7 @@ GM_NextFrame:
     lda SWCHB
     and BW_MASK
     beq .GM_BWMode
+
 .GM_ColorMode:
     lda #GAME_SKY_COLOR
     sta GM_SkyColor
@@ -441,10 +442,18 @@ GM_NextFrame:
     sta GM_BackgroundColor
     lda #GAME_PF_COLOR
     sta GM_PFColor
-    SET_POINTER GM_PlayerColorPtr, GM_PLAYER_COLOR_IDLE
     SET_POINTER GM_BirdColorPtr, GM_BIRD_COLOR
 
-.GM_SetCoreboardColorCM:
+    lda SWCHB
+    and #%01000000
+    beq .GM_SetPlayer1CM
+    SET_POINTER GM_PlayerColorPtr, GM_PLAYER2_COLOR
+    jmp .GM_PlayerCMDone
+.GM_SetPlayer1CM:
+    SET_POINTER GM_PlayerColorPtr, GM_PLAYER1_COLOR
+.GM_PlayerCMDone:
+
+.GM_SetScoreboardColorCM:
     lda Timer
     beq .GM_GameOverCM
     lda #GAME_SCOREBACK_COLOR
@@ -454,8 +463,8 @@ GM_NextFrame:
     lda #GAME_GAMEOVER_COLOR
     sta COLUBK
 .GM_SetScoreboardColorCMDone:
-
     jmp .GM_SetColorDone
+
 .GM_BWMode:
     lda #GAME_SKY_BW
     sta GM_SkyColor
@@ -463,10 +472,18 @@ GM_NextFrame:
     sta GM_BackgroundColor
     lda #GAME_PF_BW
     sta GM_PFColor
-    SET_POINTER GM_PlayerColorPtr, GM_PLAYER_BW_IDLE
     SET_POINTER GM_BirdColorPtr, GM_BIRD_BW
 
-.GM_SetCoreboardColorBW:
+    lda SWCHB
+    and #%01000000
+    beq .GM_SetPlayer1BW
+    SET_POINTER GM_PlayerColorPtr, GM_PLAYER2_BW
+    jmp .GM_PlayerBWDone
+.GM_SetPlayer1BW:
+    SET_POINTER GM_PlayerColorPtr, GM_PLAYER1_BW
+.GM_PlayerBWDone:
+
+.GM_SetScoreboardColorBW:
     lda Timer
     beq .GM_GameOverBW
     lda #GAME_SCOREBACK_COLOR
@@ -482,31 +499,31 @@ GM_NextFrame:
 .GM_SetGraphics
     lda SWCHB
     and #%01000000
-    beq .GM_SetDress
-.GM_SetPants:
-    SET_POINTER GM_PlayerPtr, GM_PANTS_IDLE
+    beq .GM_SetPlayer1
+.GM_SetPlayer2:
+    SET_POINTER GM_PlayerPtr, GM_PLAYER2_IDLE
     lda GM_PlayerAnimOn
     beq .GM_SetGraphicsDone
 
     lda GM_PlayerAnimFrame
-    bne .GM_PANTS2
-    SET_POINTER GM_PlayerPtr, GM_PANTS_WALK1
+    bne .GM_Player2_Walk2
+    SET_POINTER GM_PlayerPtr, GM_PLAYER2_WALK1
     jmp .GM_SetGraphicsDone
-.GM_PANTS2
-    SET_POINTER GM_PlayerPtr, GM_PANTS_WALK2
+.GM_Player2_Walk2
+    SET_POINTER GM_PlayerPtr, GM_PLAYER2_WALK2
 
     jmp .GM_SetGraphicsDone
-.GM_SetDress:
-    SET_POINTER GM_PlayerPtr, GM_DRESS_IDLE
+.GM_SetPlayer1:
+    SET_POINTER GM_PlayerPtr, GM_PLAYER1_IDLE
     lda GM_PlayerAnimOn
     beq .GM_SetGraphicsDone
 
     lda GM_PlayerAnimFrame
-    bne .GM_DRESS2
-    SET_POINTER GM_PlayerPtr, GM_DRESS_WALK1
+    bne .GM_Player1_Walk2
+    SET_POINTER GM_PlayerPtr, GM_PLAYER1_WALK1
     jmp .GM_SetGraphicsDone
-.GM_DRESS2
-    SET_POINTER GM_PlayerPtr, GM_DRESS_WALK2
+.GM_Player1_Walk2
+    SET_POINTER GM_PlayerPtr, GM_PLAYER1_WALK2
 
     jmp .GM_SetGraphicsDone
 .GM_SetGraphicsDone:
@@ -869,7 +886,6 @@ Randomize subroutine
 ;; Y=3 : Missile1
 ;; Y=4 : Ball
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 SetObjectXPos subroutine
         sec                     ; Set carry flag
         sta WSYNC               ; Get fresh scanline
@@ -968,7 +984,6 @@ PrepareScoreAndTimer subroutine
     rts
 
     include sfx.asm
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup tabes
@@ -1097,37 +1112,7 @@ Digits:
 
 ;---Graphics Data from PlayerPal 2600---
 
-GM_DRESS_IDLE:
-    .byte #0
-    .byte #%01111110;$70
-    .byte #%01111110;$70
-    .byte #%00111100;$70
-    .byte #%01011010;$84
-    .byte #%01111110;$84
-    .byte #%00011000;$F4
-    .byte #%00111100;$00
-    .byte #%00011000;$00
-GM_DRESS_WALK1:
-    .byte #0
-    .byte #%01111000;$70
-    .byte #%01111110;$70
-    .byte #%00111100;$70
-    .byte #%00011010;$84
-    .byte #%01111110;$84
-    .byte #%00011000;$F4
-    .byte #%00111100;$00
-    .byte #%00011000;$00
-GM_DRESS_WALK2:
-    .byte #0
-    .byte #%00011110;$70
-    .byte #%01111110;$70
-    .byte #%00111100;$70
-    .byte #%01011000;$84
-    .byte #%01111110;$84
-    .byte #%00011000;$F4
-    .byte #%00111100;$00
-    .byte #%00011000;$00
-GM_PANTS_IDLE:
+GM_PLAYER1_IDLE:
     .byte #0
     .byte #%01100110;$70
     .byte #%00100100;$70
@@ -1137,7 +1122,7 @@ GM_PANTS_IDLE:
     .byte #%00011000;$F4
     .byte #%00111100;$00
     .byte #%00011000;$00
-GM_PANTS_WALK1:
+GM_PLAYER1_WALK1:
     .byte #0
     .byte #%01100000;$70
     .byte #%00100110;$70
@@ -1147,7 +1132,37 @@ GM_PANTS_WALK1:
     .byte #%00011000;$F4
     .byte #%00111100;$00
     .byte #%00011000;$00
-GM_PANTS_WALK2:
+GM_PLAYER1_WALK2:
+    .byte #0
+    .byte #%00000110;$70
+    .byte #%01100100;$70
+    .byte #%00111100;$70
+    .byte #%01011000;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
+GM_PLAYER2_IDLE:
+    .byte #0
+    .byte #%01100110;$70
+    .byte #%00100100;$70
+    .byte #%00111100;$70
+    .byte #%01011010;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
+GM_PLAYER2_WALK1:
+    .byte #0
+    .byte #%01100000;$70
+    .byte #%00100110;$70
+    .byte #%00111100;$70
+    .byte #%00011010;$84
+    .byte #%01111110;$84
+    .byte #%00011000;$F4
+    .byte #%00111100;$00
+    .byte #%00011000;$00
+GM_PLAYER2_WALK2:
     .byte #0
     .byte #%00000110;$70
     .byte #%01100100;$70
@@ -1191,63 +1206,43 @@ GM_TREE:
 	.byte $F8,$F0,$F0,$F0,$E0,$C0,$C0,$80
 
 ;---Color Data from PlayerPal 2600---
-GM_PLAYER_COLOR_IDLE:
+GM_PLAYER1_COLOR:
     .byte #0
+    .byte #$F4;
+    .byte #$F4;
+    .byte #$F4;
     .byte #$70;
     .byte #$70;
-    .byte #$70;
-    .byte #$84;
-    .byte #$84;
     .byte #$F4;
     .byte #$00;
     .byte #$00;
-GM_PLAYER_COLOR_WALK1:
+GM_PLAYER2_COLOR:
     .byte #0
     .byte #$70;
     .byte #$70;
     .byte #$70;
-    .byte #$84;
-    .byte #$84;
+    .byte #$F4;
+    .byte #$F4;
     .byte #$F4;
     .byte #$00;
     .byte #$00;
-GM_PLAYER_COLOR_WALK2:
+GM_PLAYER1_BW:
     .byte #0
-    .byte #$70;
-    .byte #$70;
-    .byte #$70;
-    .byte #$84;
-    .byte #$84;
-    .byte #$F4;
-    .byte #$00;
-    .byte #$00;
-GM_PLAYER_BW_IDLE:
-    .byte #0
-    .byte #$0;
-    .byte #$0;
-    .byte #$0;
-    .byte #$02;
-    .byte #$02;
+    .byte #$04;
+    .byte #$04;
     .byte #$04;
     .byte #$00;
     .byte #$00;
-GM_PLAYER_BW_WALK1:
-    .byte #0
-    .byte #$0;
-    .byte #$0;
-    .byte #$0;
-    .byte #$02;
-    .byte #$02;
     .byte #$04;
     .byte #$00;
     .byte #$00;
-GM_PLAYER_BW_WALK2:
+GM_PLAYER2_BW:
     .byte #0
-    .byte #$0;
-    .byte #$0;
-    .byte #$0;
-    .byte #$02;
-    .byte #$02;
+    .byte #$00;
+    .byte #$00;
+    .byte #$00;
+    .byte #$04;
+    .byte #$04;
     .byte #$04;
     .byte #$00;
     .byte #$00;
