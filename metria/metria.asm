@@ -74,6 +74,9 @@ GAME_BIRD_HEIGHT = 6            ; bird sprite height
 GAME_BIRD_TICK_LEN = 10         ; bird anim speed
 GAME_BIRD_YPOS_TBL_LEN = 12     ; bird anim table length
 
+GAME_TREE_HEIGHT = 20
+GAME_TREE_Y_POS = 28
+
 GAME_DIGIT_HEIGHT = 5           ; digit height for score and timer
 
 GAME_MAX_TIME = %01100000       ; initial game time in BCD - 60
@@ -685,8 +688,8 @@ GM_NextFrame:
 .GM_DrawTree:
     txa               ; A = current scanline in playfield
     sec                         ; make sure carry flag is set
-    sbc #28                     ; subtract sprite Y coordinate
-    cmp #20                      ; are we inside the sprite height bounds?
+    sbc #GAME_TREE_Y_POS                     ; subtract sprite Y coordinate
+    cmp #GAME_TREE_HEIGHT                      ; are we inside the sprite height bounds?
     bcc .GM_WriteTree         ; if result < height then A contains the index
     lda #0                      ; else, set A to 0
 .GM_WriteTree 
@@ -874,6 +877,12 @@ Randomize subroutine
     eor Random
     asl
     rol Random               ; performs a series of shifts and bit operations
+
+    bne .RandomEnd
+    lda #RANDOM_SEED
+    sta Random
+
+.RandomEnd
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
